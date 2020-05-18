@@ -1,0 +1,103 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Fancy Weather</title>
+    <link
+        href="https://fonts.googleapis.com/css2?family=Open+Sans:ital,wght@0,300;0,400;0,600;0,700;1,300;1,400&display=swap"
+        rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@200;300;400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.8.2/css/all.css">
+    <!-- <link rel="stylesheet" href="./css/style.css"> -->
+    <!-- будет подключен с помощью webpack-->
+</head>
+
+<body>
+    <div class="container">
+        <div class="controls">
+            <div class="buttons">
+                <div class="button button__reload">
+                    <div class="icon__reload"></div>
+                </div>
+                <div class="button button__lang">
+                    <div class="lang__value">EN</div>
+                    <div class="lang__select">
+                        <div class="arrow down"></div>
+                        <div class="lang__alllangs hidden">
+                            <div class="alllangs be">BE</div>
+                            <div class="alllangs en active">EN</div>
+                            <div class="alllangs ru">RU</div>
+                        </div>
+                    </div>
+                </div>
+                <div class="button button__temp">
+                    <div class="temptype fahrentgeit inactive">F</div>
+                    <div class="temptype celsius">C</div>
+                </div>
+            </div>
+            <div class="search">
+                <div class="search__input">
+                    <input type="text" name="" id="" placeholder="Search city or ZIP">
+                    <div class="mic"></div>
+                </div>
+                <div class="search__button">Search</div>
+            </div>
+        </div>
+
+        <div class="city">Minsk, Belarus</div>
+        <div class="date">Mon 28 October 11:00</div>
+        <div class="main">
+            <div class="weather">
+                <div class="weather__today">
+                    <div class="today__temperature">10</div> 
+                    <div class="today__info">
+                        <div class="info__icon"></div>
+                        <div class="info__text">
+                            <div class="overcast">overcast</div>
+                            <div class="feels">Feels like: 7°</div>
+                            <div class="wind">Wind: 2 m/s</div>
+                            <div class="humidity">Humidity: 83%</div>
+                        </div>
+                    </div>
+                </div>
+                <div class="weather__3days">
+                    <div class="weather__tomorrow">
+                        <div class="weekday__name">Monday</div>
+                        <div class="weekday__temperature">
+                            <div class="temperature__value">10°</div>
+                            <div class="temperature__icon"></div>
+                        </div>
+                    </div>
+                    <div class="weather__tomorrow">
+                        <div class="weekday__name">Tuesday</div>
+                        <div class="weekday__temperature">
+                            <div class="temperature__value">11°</div>
+                            <div class="temperature__icon"></div>
+                        </div>
+                    </div>
+                    <div class="weather__tomorrow">
+                        <div class="weekday__name">Wednesday</div>
+                        <div class="weekday__temperature">
+                            <div class="temperature__value">12°</div>
+                            <div class="temperature__icon"></div>
+                        </div>
+                    </div>
+
+                </div>
+            </div>
+            <div class="location">
+                <div class="location__map"></div>
+                <div class="location__coords">
+                    <div class="latitude">Latitude: 53°54'</div>
+                    <div class="longitude">Longitude: 27°34'</div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <!-- <script type="module" src="./js/index.js"></script> -->
+    <!-- будет подключен в wepback -->
+</body>
+
+</html>

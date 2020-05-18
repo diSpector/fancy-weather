@@ -1,0 +1,956 @@
+/* @import 'filename.css'; */ /* импорт другого файла стилей (например, шрифта) - вебпак соберет и его*/
+/* @import '~normalize.css'; */ /* тильда означает, что пакет нужно искать в node_modules */
+/* @import '~@glidejs/glide/dist/css/glide.core.min.css'; glide styles */
+
+html, body {
+    padding: 0;
+    margin: 0;
+    height: 100%;
+}
+
+html {
+    /* font-family: 'Open Sans', sans-serif; */
+    font-family: 'Montserrat', sans-serif;
+    font-size: 10px;
+    /* -webkit-text-stroke-width: 1px;
+   -webkit-text-stroke-color: lightgray; */
+}
+
+body {
+    font-weight: bold;
+    color: white;
+    height: 100%;
+    /* background-image: url('../img/background.jpg'); */
+    background-image: url('../img/bg1.jpg');
+    background-size: cover;
+    background-position: center;
+    background-repeat: no-repeat;
+    background-attachment: fixed;
+}
+
+.container {
+    height: 100%;
+    padding: 40px 90px;
+    /* background-image: url('../img/background.jpg');
+    background-size: cover;
+    background-position: center;
+    background-repeat: no-repeat;
+    background-attachment: fixed;
+    box-sizing: border-box; */
+}
+
+.controls {
+    display: flex;
+    flex-wrap: wrap;
+    flex-direction: row;
+    justify-content: space-between;
+    color: white;
+    font-size: 1.4rem;
+    margin-bottom: 60px;
+}
+
+.buttons {
+    display: flex;
+    flex-direction: row;
+    /* width: 50%; */
+}
+
+.button {
+    width: 44px;
+    height: 44px;
+    border-radius: 5px;
+    background-color: rgba(174, 181, 185, 0.5);
+    box-sizing: border-box;
+    padding: 0;
+    margin-right: 10px;
+    line-height: 44px;
+    text-align: center;
+}
+
+.button:hover {
+    cursor: pointer;
+    background-color: #b4b8bb;
+}
+
+.button__reload {
+    background-image: url('../img/refresh_back.svg');
+    background-size: cover;
+    background-position: center;
+    background-repeat: no-repeat;
+    position: relative;
+}
+
+.icon__reload {
+    background-image: url('../img/icons/refresh.svg');
+    background-size: cover;
+    background-position: center;
+    background-repeat: no-repeat;
+    width: 16px;
+    height: 20px;
+    position: absolute;
+    top: 13px;
+    left: 15px;
+}
+
+.button__lang {
+    width: 71px;
+    display: flex;
+}
+
+.lang__value {
+    width: 44px;
+}
+
+.lang__select {
+    position: relative;
+}
+
+.lang__alllangs {
+    position: absolute;
+    top: 42px;
+    width: 71px;
+    right: -27px;
+    background-color: #b4b8bb;
+    opacity: 0.5;
+}
+
+.alllangs:hover {
+    background-color: #a0b8bb;
+}
+
+.arrow {
+    border: solid white;
+    border-width: 0 3px 3px 0;
+    display: inline-block;
+    padding: 3px;
+    position: absolute;
+    top: 16px;
+}  
+
+.down {
+    transform: rotate(45deg);
+}
+
+.up {
+    transform: rotate(-135deg);
+    top: 19px;
+}
+
+.button__temp {
+    width: 88px;
+    display: flex;
+}
+
+.temptype {
+    width: 50%;
+    position: relative;
+}
+
+.temptype::before {
+    display: block;
+    position: absolute;
+    content: 'o';
+    font-size: 1rem;
+    top: -3px;
+    left: 10px;
+}
+
+.search {
+    width: 50%;
+}
+
+.fahrentgeit {
+    border-top-left-radius: 5px;
+    border-bottom-left-radius: 5px; 
+}
+
+.celsius {
+    border-top-right-radius: 5px;
+    border-bottom-right-radius: 5px;
+}
+
+.search {
+    width: 375px;
+    height: 44px;
+    border-radius: 5px;
+    display: flex;
+    box-sizing: border-box;
+}
+
+.search__input {
+    width: 274px;
+    position: relative;
+}
+
+.search__input input {
+    height: 44px;
+    width: 274px;
+    box-sizing: border-box;
+    border-top-left-radius: 5px;
+    border-bottom-left-radius: 5px; 
+    border: 1px solid rgba(174, 181, 185, 0.5);
+    background: rgba(76, 82, 85, 0.4);
+    font-size: 1.4rem;
+    color: white;
+    font-family: 'Montserrat', sans-serif;
+    padding: 13px 58px 13px 15px; 
+}
+
+.search__input input::placeholder {
+    color: white;
+}
+
+.search__button {
+    width: 101px;
+    height: 44px;
+    background: rgb(174, 181, 185);
+    font-size: 1.4rem;
+    text-transform: uppercase;
+    text-align: center;
+    line-height: 44px;
+    border-top-right-radius: 5px;
+    border-bottom-right-radius: 5px;
+}
+
+.search__button:hover {
+    cursor: pointer;
+}
+
+.mic {
+    position: absolute;
+    background-image: url('../img/icons/mic.svg');
+    width: 15px;
+    height: 18px;
+    top: 15px;
+    right: 10px;
+}
+
+.mic:hover {
+    cursor: pointer;
+}
+
+.active {
+    background: rgba(76, 82, 85, 0.4);
+}
+
+.inactive {
+    background: rgba(76, 82, 85, 0.4);
+    color: hsla(0,0%,100%,.7);
+}
+
+.hidden {
+    display: none;
+}
+
+.city {
+    font-size: 4.4rem;
+    text-transform: uppercase;
+    line-height: 5.4rem;
+}
+
+.date {
+    font-size: 2.4rem;
+    line-height: 2.9rem;
+}
+
+.main {
+    display: flex;
+    flex-direction: row;
+    flex-wrap: wrap;
+    justify-content: space-between;
+}
+
+.weather {
+}
+
+.weather__today {
+    display: flex;
+    flex-direction: row;
+    justify-content: left;
+}
+
+.today__temperature {
+    position: relative;
+    font-size: 30rem;
+    line-height: 37rem;
+    margin-right: 40px;
+}
+
+.today__temperature::after {
+    display: block;
+    position: absolute;
+    content: 'o';
+    font-size: 7rem;
+    bottom: 410px;
+    right: -40px;
+    width: 50px;
+    height: 50px;
+}
+
+.today__info {
+    display: flex;
+    flex-direction: column;
+    font-size: 2.2rem;
+    line-height: 3.7rem;
+    text-transform: uppercase;
+}
+
+.info__icon {
+    background-image: url('../img/icons/weather_dummy.svg');
+    width: 162px;
+    height: 102px;
+    margin-bottom: 50px;
+}
+
+.info__text {
+    /* font-size: 2.2rem;
+    line-height: 3.7rem;
+    text-transform: uppercase; */
+}
+
+.weather__3days {
+    display: flex;
+    flex-direction: row;
+    flex-wrap: wrap;
+    text-transform: uppercase; 
+}
+
+.weather__tomorrow {
+    margin-right: 50px;
+}
+
+.weekday__name {
+    font-size: 2.2rem;
+    line-height: 2.7rem;
+}
+
+.weekday__temperature {
+    font-size: 8.0rem;
+    line-height: 9.8rem;
+    display: flex;
+    flex-direction: row;
+}
+
+.temperature__icon {
+    background-image: url('../img/icons/weather_dummy.svg');
+    background-size: cover;
+    background-position: center;
+    background-repeat: no-repeat;
+    width: 67px;
+    height: 44px;
+    margin-top: 20px;
+}
+
+.location {
+    width: 375px;
+    margin-top: 15px;
+}
+
+.location__map {
+    background-image: url('../img/map.png');
+    width: 375px;
+    height: 375px;
+    border-radius: 25px;
+}
+
+.location__coords {
+    font-size: 2.0rem;
+    line-height: 3.0rem;
+    text-align: right;
+    font-weight: 600;
+    margin-top: 35px;
+}
+
+@media (max-width: 1250px) {
+    .city, .date {
+        text-align: center;
+    }
+    .main {
+        flex-direction: column; 
+    }
+    .weather {
+        width: 100%;
+    }
+    .weather__today {
+        justify-content: center;
+    }
+    .weather__3days {
+       justify-content: center;
+    }
+    .weather__tomorrow {
+        margin-right: 20px;   
+    }
+    .location {
+        width: 100%;
+    }
+    .location__map {
+        margin: 0 auto; 
+    }
+    .location__coords {
+        text-align: center;
+        margin-bottom: 20px;
+    }
+
+}
+
+@media (max-width: 810px) {
+    .container {
+        padding: 20px;
+    }
+    .controls {
+        flex-direction: column;
+        align-items: center;
+    }
+
+    .buttons{
+        margin-bottom: 20px;
+    }
+
+    .today__temperature{
+        font-size: 25rem;
+    }
+
+    .today__info {
+        font-size: 1.8rem;
+        line-height: 3.2rem;
+    }
+
+    .weather__3days {
+        flex-direction: column;
+        align-items: center;
+    }
+
+    .weekday__name{
+        text-align: center;
+    }
+}
+
+@media (max-width: 550px) {
+    .container {
+        padding: 20px 0px;
+    }
+    .weather__today {
+        flex-direction: column;
+        align-items: center;
+    }
+
+    .today__temperature {
+        line-height: 30rem;
+    }
+
+    .today__temperature::after {
+        bottom: 330px;
+    }
+
+    .info__icon{
+        margin-bottom: 10px;
+    }
+
+    .today__info {
+        font-style: 2.4rem;
+    }
+
+    .weather__3days {
+        margin-top: 30px;
+    }
+}
+
+@media (max-width: 400px) {
+    .search {
+        width: 100%;
+    }
+
+    .search__input {
+        width: 73%;
+    }
+
+    .search__input input {
+        width: 100%;
+    }
+
+    .search__button {
+        width: 27%;
+    }
+
+    .today__temperature {
+        font-size: 20rem;
+        line-height: 25rem;
+    }
+
+    .today__temperature::after {
+        bottom: 260px;
+    }
+
+    .location__map {
+        width: 100%;
+    }
+}
+/* @media (max-width: 750px) {
+    .controls {
+        flex-direction: column;
+        align-items: center;
+    }
+
+    .buttons{
+        margin-bottom: 20px;
+    }
+
+    .weather__3days {
+        flex-direction: column;
+        align-items: center;
+    }
+} */
+
+
+/* .header{
+    background-image: url('../img/background.jpg');
+    margin-bottom: 40px;
+}
+
+.header__text{
+    padding: 10px;
+    margin: 0 auto;
+    text-align: center;
+}
+
+h1{
+    font-size: 1.6rem;
+    color: white;
+}
+
+.search{
+    width: 100%;
+    max-width: 1020px;
+    display: flex;
+    flex-direction: row;
+    flex-wrap: wrap;
+    margin: 40px auto;
+}
+
+.search__input{
+    width: 90%;
+    position: relative;
+}
+
+.search__input input {
+    width: 100%;
+    padding: 5px 0 5px 30px;
+    box-sizing: border-box;
+}
+
+.search__icon{
+    position: absolute;
+    background-image: url('../img/icons/search.png');
+    background-size: cover;
+    top: 5px;
+    left: 7px;
+    width: 20px;
+    height: 20px;
+    opacity: 0.5;
+}
+
+.search__icon:hover{
+    cursor: pointer;
+    opacity: 1;
+}
+
+.search__button{
+    width: 10%;
+    background-color: orange;
+    color: white;
+    font-size: 1.0rem;
+    text-align: center;
+    line-height: 28px;
+}
+
+.search__button:hover{
+    cursor: pointer;
+    background-color: darkorange;    
+}
+
+.close__icon{
+    position: absolute;
+    background-image: url('../img/icons/close.png');
+    background-size: cover;
+    top: 6px;
+    right: 42px;
+    width: 17px;
+    height: 17px;
+    opacity: 0.5;
+}
+
+.close__icon:hover{
+    cursor: pointer;
+    opacity: 1;
+}
+
+.keyboard__icon{
+    position: absolute;
+    background-image: url('../img/icons/keyboard.png');
+    background-size: cover;
+    top: 0px;
+    right: 7px;
+    width: 28px;
+    height: 28px;
+    opacity: 0.5;
+}
+
+.keyboard__icon:hover{
+    cursor: pointer;
+    opacity: 1;
+}
+
+.search__text, .search__error{
+    width: 100%;
+    height: 20px;
+    margin-top: 20px;
+    text-align: center;
+    font-size: 0.9rem;
+}
+
+.footer__wrapper{
+    width: 100%;
+    max-width: 1020px;
+    display: flex;
+    flex-direction: row;
+    justify-content: space-between;
+    margin: 0 auto;
+}
+
+.movies {
+    width: 100%;
+    max-width: 1020px;
+    min-height: 411px;
+    margin: 40px auto;
+    position: relative;
+}
+
+.loader{
+    position: absolute;
+    width: 100%;
+    height: 100%;
+    background-image: url('../img/icons/loader.gif');
+    background-repeat:no-repeat;
+    background-position: center center;
+    background-size: 50px;
+    z-index: 100;
+    backdrop-filter: blur(5px);
+}
+
+.glide__slide{
+    font-size: 0.9rem;
+    font-weight: bold;
+    text-align: center;
+    padding: 5px;
+}
+
+.glide__slide:hover{
+    cursor: pointer;
+}
+
+.glide__arrows{
+    position: absolute;
+    top: 180px;
+    width: 100%;
+}
+
+.glide__arrow{
+    position: absolute;
+    background-color: white;
+    color: white;
+    border: none;
+    height: 37px;
+    background-repeat:no-repeat;
+    background-position: center center;
+    background-size: contain;
+    outline: none;
+}
+
+.glide__arrow:hover{
+    cursor: pointer;
+    opacity: 1;
+}
+
+.glide__arrow--left{
+    left: -25px;
+    background-image: url('../img/icons/chev_left.svg');
+}
+
+.glide__arrow--left:hover{
+    background-image: url('../img/icons/chev_left_hov.svg');
+}
+
+.glide__arrow--right{
+    right: -25px;
+    background-image: url('../img/icons/chev_right.svg');
+}
+
+.glide__arrow--right:hover{
+    background-image: url('../img/icons/chev_right_hov.svg');
+}
+
+.glide__bullets{
+    margin: 10px auto;
+    width: 185px;
+    text-align: center;
+}
+
+.glide__bullet{
+    border-radius: 100%;
+    height: 12px;
+    border: none;
+    background-color: lightgray;
+    margin: 3px;
+}
+
+.glide__bullet{
+    outline: none;
+
+}
+
+.glide__bullet:hover{
+    cursor: pointer;
+    background-color: gold;
+}
+
+.glide__bullet--active{
+    background-color: gold;
+
+}
+
+.movie__slide{
+    max-width: 200px;
+    box-shadow: 0px 0px 5px 0px rgba(0,0,0,0.75);
+    margin: 0 auto;
+}
+
+.movie__slide:hover{
+    box-shadow: 0px 0px 10px 0px rgba(166,100,0,1);
+}
+
+.movie__title{
+    height: 50px;
+    text-decoration: underline;
+    padding: 5px;
+}
+
+.movie__title a{
+    color: black;
+}
+
+.movie__title:hover{
+    cursor: pointer;
+}
+
+.movie__img{
+    height: 293px;
+    background-size: contain;
+    background-repeat: no-repeat;
+    background-position: center;
+}
+
+.movie__rating{
+    position: relative;
+}
+
+.movie__rating::before{
+    position: absolute;
+    background-image: url('../img/icons/star.png');
+    background-size: contain;
+    background-repeat: no-repeat;
+    background-position: center;
+    width: 100%;
+    height: 15px;
+    left: -20px;
+    top: 2px;
+    content: " ";
+}
+
+.movie__rating .heart{
+    position: absolute;
+    background-image: url('../img/icons/heart.png');
+    background-size: contain;
+    background-repeat: no-repeat;
+    background-position: center;
+    width: 15px;
+    height: 15px;
+    top: 2px;
+}
+
+.movie__rating .heart.favorite{
+    background-image: url('../img/icons/hearted.png');
+}
+
+.movie__rating .heart:hover {
+    height: 17px; 
+}
+
+.favorites{
+    max-width: 1020px;
+    margin: 0 auto;
+}
+
+.favorites__title{
+    font-size: 1.8rem;
+    margin: 20px auto;
+    text-align: center;
+}
+
+.favorites__movies{
+    padding: 0 40px;
+    margin-bottom: 20px;
+    display: flex;
+    flex-direction: row;
+    flex-wrap: wrap;
+    justify-content: flex-start;
+}
+
+.favorite__movie{
+    position: relative;
+    border: 1px solid black;
+    border-radius: 4px;
+    padding: 5px 30px 5px 5px;
+    font-size: 0.9rem;
+    margin: 10px;
+    box-shadow: 0px 0px 5px 0px rgba(0,0,0,0.75);
+}
+
+.favorite__movie:hover{
+    cursor: pointer;
+    box-shadow: 0px 0px 10px 0px rgba(166,100,0,1);
+}
+
+.favorite__movie a{
+    color: black;
+}
+
+.favorite__movie span {
+    position: absolute;
+    background-image: url('../img/icons/close.png');
+    background-size: cover;
+    width: 10px;
+    height: 10px;
+    right: 8px;
+    top: 34%;
+    opacity: 0.5;
+}
+
+.favorite__movie span:hover{
+    opacity: 1;
+}
+
+.footer{
+    background-image: url('../img/background.jpg');
+    color: white;
+    font-size: 1.0rem;
+    line-height: 1.4rem;
+    padding: 5px 0px;
+}
+
+.author__copy{
+    position: relative;
+}
+
+.author__copy::before{
+    content: " ";
+    position: absolute;
+    background-image: url('../img/icons/github.png');
+    background-size: cover;
+    top: -3px;
+    right: 70px;
+    width: 28px;
+    height: 28px;
+}
+
+.help__block{
+    margin-top: 10px;
+    text-align: center;
+    font-size: 0.9rem;
+}
+
+.keyboard {
+    position: fixed;
+    bottom: 0;
+    width: 100%;
+    background-color: white;
+    padding: 10px;
+    box-sizing: border-box;
+    box-shadow: 0px 0px 5px 0px rgba(0,0,0,0.75);
+    transition: bottom 0.3s ease;
+}
+
+.underscreen {
+    bottom: -300px;
+}
+
+.hidden {
+    display: none;
+}
+
+.error {
+    color: red;
+}
+
+@media (max-width: 1020px){
+    .search{
+        width: 90%;
+        margin: 0 auto;
+    }
+
+    .keyboard__icon{
+        display: none;
+    }
+
+    .close__icon{
+        right: 7px;
+    }
+
+    .footer__wrapper{
+        width: 90%;
+    }
+    
+    .keyboard{
+        bottom: -300px;
+    }
+}
+
+@media (max-width: 600px){
+    .search__input{
+        width: 80%;
+        margin: 0 auto;
+    }
+    .search__button{
+        width: 20%;
+    }
+
+}
+
+@media (max-width: 1080px){
+    .glide__arrows{
+        width: 95%;
+    }
+
+    .glide__arrow--left{
+        left: 0;
+        background-image: url('../img/icons/chev_left.svg');
+    }
+    
+    .glide__arrow--right{
+        right: -35px;
+        background-image: url('../img/icons/chev_right.svg');
+    }
+}
+
+@media (max-width: 740px){   
+    .glide__arrow--right{
+        right: -25px;
+        background-image: url('../img/icons/chev_right.svg');
+    }
+}
+
+@media (max-width: 500px){   
+    .glide__arrow--right{
+        right: -15px;
+        background-image: url('../img/icons/chev_right.svg');
+    }
+} */
