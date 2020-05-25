@@ -10,6 +10,8 @@
         rel="stylesheet">
     <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@200;300;400;500;600;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.8.2/css/all.css">
+    <script src='https://api.mapbox.com/mapbox-gl-js/v1.10.1/mapbox-gl.js'></script>
+    <link href='https://api.mapbox.com/mapbox-gl-js/v1.10.1/mapbox-gl.css' rel='stylesheet' />
     <!-- <link rel="stylesheet" href="./css/style.css"> -->
     <!-- будет подключен с помощью webpack-->
 </head>
@@ -88,7 +90,7 @@
                 </div>
             </div>
             <div class="location">
-                <div class="location__map"></div>
+                <div class="location__map" id="map"></div>
                 <div class="location__coords">
                     <div class="latitude">Latitude: 53°54'</div>
                     <div class="longitude">Longitude: 27°34'</div>
@@ -96,6 +98,19 @@
             </div>
         </div>
     </div>
+    <script>
+        mapboxgl.accessToken = 'pk.eyJ1IjoidGVzdGluZ2FwaXMiLCJhIjoiY2thbGx6dnRnMHZ5ZjMwdGR5MXVmYzdtaSJ9.laJHrx2lp_5xUzjuM75N-Q';
+            var map = new mapboxgl.Map({
+            container: 'map',
+            style: 'mapbox://styles/mapbox/streets-v11',
+            center: [37.620393, 55.753960],
+            zoom: 8,
+        });
+        
+        var marker = new mapboxgl.Marker()
+            .setLngLat([37.620393, 55.753960])
+            .addTo(map);
+    </script>
     <!-- <script type="module" src="./js/index.js"></script> -->
     <!-- будет подключен в wepback -->
 </body>
