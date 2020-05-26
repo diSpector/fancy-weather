@@ -22,7 +22,7 @@ export default {
                 key: '9cdf299171544412be174b94e11dd47f',
                 lang: 'en',
                 units: 'M', // metric, F - Fahrenheit,
-                days: 4,
+                days: 5,
                 city: 'Moscow',
             },
         },
@@ -33,6 +33,7 @@ export default {
                 city: 'Moscow',
                 key: '9cdf299171544412be174b94e11dd47f',
                 lang: 'en',
+                units: 'M', // metric, F - Fahrenheit,
             }
 
         },
@@ -41,7 +42,7 @@ export default {
             url: 'https://www.flickr.com/services/rest/?',
             params: {
                 method: 'flickr.photos.search',
-                key: 'b690d29aff650cd0fb6a24fa2830c1d5',
+                api_key: 'b690d29aff650cd0fb6a24fa2830c1d5',
                 secret: 'a4879623dd575d22',
                 // tags: 'nature,spring,morning',
                 tag_mode: 'all',

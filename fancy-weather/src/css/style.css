@@ -361,6 +361,10 @@ body {
     margin-top: 35px;
 }
 
+.latitude, .longitude{
+    text-transform: uppercase;
+}
+
 @media (max-width: 1250px) {
     .city, .date {
         text-align: center;

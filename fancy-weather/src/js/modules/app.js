@@ -14,70 +14,275 @@ export default class App {
     this.state = {};
     this.lang = null; // язык приложения
     this.units = null; // система измерений приложения
+    this.timerId = null;
+    // this.timezone = null; 
   }
 
   async init() { // первоначальный рендеринг
     this.setDefaults();
+    this.addListeners();
 
     const dataObj = await this.getAllDataFromApis();
-    this.renderAllData();
+    // this.renderAllData();
 
   }
 
+  addListeners() { // установить слушатели событий
+    const body = document.querySelector('body');
+    body.addEventListener('stateUpdated', this.render);
+    body.addEventListener('mounted', this.runTimer);
+
+    // const search = document.querySelector('.search__button');
+    // search.addEventListener('click', this.stopTimer);
+
+
+    // body.addEventListener('stateUpdated', this.renderAllData);
+    //   const resetIcon = document.querySelector(this.appConfig.resetIconSelector);
+    //   resetIcon.addEventListener('click', this.resetInput);
+
+    //   const lensIcon = document.querySelector(this.appConfig.lensIconSelector);
+    //   lensIcon.addEventListener('click', () => this.search());
+  }
+
+  runTimer = () => { // запустить таймер (часы)
+    this.timerId = setInterval(() => {
+      const { time } = this.getDateTimeByTimezone(this.state.timezone);
+      const dateContainer = document.querySelector(this.appConfig.dateContainer);
+      dateContainer.innerText = `${this.state.date}, ${time}`;
+    }, 1000);
+  }
+
+  stopTimer = () => { // остановить таймер (пока не используется)
+    clearInterval(this.timerId); //
+  }
+
+  render = () => {
+    this.renderAllData();
+    this.emitEvent('mounted');
+  }
+
   setDefaults() { // установить настройки по умолчанию
+    // this.lang = 'be';
     this.lang = this.appConfig.defaults.language;
     this.units = this.appConfig.defaults.units;
   }
 
   async getAllDataFromApis() { // получить все данные от API - город, дата/время, погода, карта
-    const city = await this.getCity();
-    console.log('city', city);
+    let state = {};
 
-    const cityParams = await this.getCityParams(city);
+    const cityObj = await this.getCity();
+    console.log('cityObj', cityObj);
+    const { city: cityName, timezone } = cityObj;
+    console.log('cityName', cityName);
+    console.log('timezone', timezone);
+
+    const { date, time, dateObj } = this.getDateTimeByTimezone(timezone);
+    console.log('date', date);
+    console.log('time', time);
+    console.log('dateObj', dateObj); //
+
+    // setInterval(() => {
+    //   const {time} = this.getDateTimeByTimezone(timezone);
+    //   console.log('time', time);
+    // }, 1000);
+
+    const cityParams = await this.getCityParams(cityName);
     console.log('cityParams', cityParams);
 
-    const weatherNow = await this.getWeatherNowForCity(city);
+    const { components: { town: name, country }, geometry: { lat, lng } } = cityParams;
+    console.log('cityName from cityParams', name);
+    console.log('country from cityParams', country);
+    const corLat = this.correctCoords(lat);
+    const corLng = this.correctCoords(lng);
+    console.log('lat from cityParams', corLat);
+    console.log('lng from cityParams', corLng);
 
-    const weatherDaily = await this.getWeatherDailyForCity(city);
+    const weatherNow = await this.getWeatherNowForCity(cityName);
+    console.log('weatherNow', weatherNow);
+    const { temp, app_temp: feelsLike, wind_spd: wind, rh: humidity, weather: { description } } = weatherNow;
+    const roundTemp = Math.round(temp);
+    const roundFeels = Math.round(feelsLike);
+    const roundWind = Math.round(wind);
+    const roundHumidity = Math.round(humidity);
+    console.log('temp', roundTemp);
+    console.log('feelsLike', roundFeels);
+    console.log('wind', roundWind);
+    console.log('humidity', roundHumidity);
+    console.log('description', description);
 
+    const tags = this.getTagsString(dateObj, description);
+    console.log('tags', tags);
 
+    const weatherDaily = await this.getWeatherDailyForCity(cityName);
+    const weather3Days = this.destructWeatherFor3Days(weatherDaily);
+    // const weather3Days = weatherDaily.map((weatherForDay))
+    // const datesAfterArr = this.getAfterDates(dateObj);
+    console.log('weather3Days', weather3Days);
+
+    const backImg = await this.getFlickrImgByTags(tags);
+    // const backImg = await this.getFlickrImgByTags('spring');
+
+    console.log('backImg', backImg); //
+
+    state = {
+      city: name,
+      country,
+      date,
+      time,
+      timezone,
+      lat: corLat,
+      lng: corLng,
+      weatherToday: {
+        temp: roundTemp,
+        feels: roundFeels,
+        wind: roundWind,
+        humidity: roundHumidity,
+        description
+      },
+      weather3Days,
+      backImg,
+    };
+    console.log('state', state);
+
+    this.setState(state);
   }
 
-  async getCityParams (cityName) {
-    const cityParamsApiHelper = new ApiHelper(this.apiConfig.opencage, {q: cityName, language: this.lang});
-    const apiUrl = cityParamsApiHelper.getRequestUrl();
-    const cityParamsPromise = await fetch(apiUrl);
-    const cityParamsJson = await cityParamsPromise.json();
-    console.log('cityParamsJson', cityParamsJson);
+  setState(state) { // установить глобальное состояние приложения
+    this.state = state;
+    this.emitEvent('stateUpdated');
+  }
 
-    const cityParams = {
-      name: cityParamsJson.results[0].components.town, 
-      country: cityParamsJson.results[0].components.country,
-      lat: cityParamsJson.results[0].geometry.lat,
-      lng: cityParamsJson.results[0].geometry.lng,
+  emitEvent(eventName) {
+    const app = document.querySelector('body');
+    let event = new Event(eventName);
+    app.dispatchEvent(event);
+  }
+
+  correctCoords(coord) { // перевести дробные доли градусов в минуты
+    const newCoord = Math.trunc(coord);
+    const expn = coord - newCoord;
+    const expInMin = Math.trunc(expn * 60);
+    return `${newCoord}°${expInMin}'`;
+  }
+
+  async getFlickrImgByTags(tagsStr) { // получить массив фоток, выбрать одну
+    const imgApiHelper = new ApiHelper(this.apiConfig.flickr, { tags: tagsStr });
+    const apiUrl = imgApiHelper.getRequestUrl();
+
+    const imgPromise = await fetch(apiUrl);
+    const imgJson = await imgPromise.json();
+    console.log('imgJson', imgJson);
+
+    const photos = imgJson.photos.photo;
+    console.log('photos', photos);
+    const photoObj = (photos.length) ? photos[Math.floor(Math.random() * photos.length)] : null;
+    if (!photoObj) {
+      return null;
+    }
+    // console.log('photoObj', photoObj);
+    const imgUrl = await this.getFarmImg(photoObj);
+    return imgUrl;
+  }
+
+  async getFarmImg(photoObj) { // получить url картинки с flickr
+    const apiUrl = `https://farm${photoObj.farm}.staticflickr.com/${photoObj.server}/${photoObj.id}_${photoObj.secret}_b.jpg`;
+    const imgObj = await fetch(apiUrl);
+    return imgObj.url;
+  }
+
+  getTagsString(dateObj, weathDescr) { // получить строку с тегами
+    // const tags = [weathDescr];
+    const tags = [];
+
+    const month = dateObj.getMonth() + 1;
+    const hour = dateObj.getHours();
+
+    tags.push(this.getYearTime(month), this.getDayTime(hour));
+    return tags.join(',');
+  }
+
+  getYearTime(monthNum) { // получить название времени года
+    let yearTime = '';
+    switch (true) {
+      case monthNum <= 3:
+        yearTime = 'winter';
+        break;
+      case monthNum <= 6:
+        yearTime = 'spring';
+        break;
+      case monthNum <= 9:
+        yearTime = 'summer';
+        break;
+      default:
+        yearTime = 'autumn';
+        break;
+    }
+    return yearTime;
+  }
+
+  getDayTime(dayHour) { // получить название времени суток
+    let dayTime = '';
+    switch (true) {
+      case dayHour <= 6:
+        dayTime = 'night';
+        break;
+      case dayHour <= 10:
+        dayTime = 'morning';
+        break;
+      case dayHour <= 18:
+        dayTime = 'daytime';
+        break;
+      default:
+        dayTime = 'evening';
+        break;
+    }
+    return dayTime;
+  }
+
+  destructWeatherFor3Days(weather3Obj) {
+    const weather3DaysObj = weather3Obj.map(this.destructWeatherForDay);
+    return weather3DaysObj;
+  }
+
+  destructWeatherForDay = (weather1Obj) => {
+    const locale = this.appConfig.languagesCodes[this.lang];
+    const { temp, valid_date, weather: { description, code } } = weather1Obj;
+    const roundTemp = Math.round(temp);
+    const weekday = (new Date(valid_date)).toLocaleDateString(locale, { weekday: 'long' });
+    return { roundTemp, weekday, description, code };
+  }
+
+  getAfterDates(dateObj) {
+    console.log('today', dateObj);
+    dateObj.setDate(dateObj.getDate() + 1);
+    console.log('tomorrow', `${dateObj.getFullYear()}-${dateObj.getMonth() + 1}-${dateObj.getDate()}`); //
+    // console.logt('tomorrow', dateObj.toISOString().slice(0,10));
+    // console.log('after tomorrow', dateObj.addDays(2).toString("dd-mm-yyyy"));
+    // console.log(new Date(date));
+  }
+
+  getDateTimeByTimezone(timeZone) {
+    const dateFormatObj = {
+      month: 'short',
+      day: '2-digit',
+      weekday: 'short',
+      timeZone: timeZone,
     };
 
-    return cityParams;
-  }
+    const timeFormatObj = {
+      hour: '2-digit',
+      minute: 'numeric',
+      second: 'numeric',
+      hour12: false,
+    };
 
-  async getWeatherNowForCity(cityName) {
-    const weatherApiHelper = new ApiHelper(this.apiConfig.weatherCurrent, {city: cityName});
-    const apiUrl = weatherApiHelper.getRequestUrl();
+    const locale = this.appConfig.languagesCodes[this.lang];
+    const dateObj = new Date();
 
-    const weatherPromise = await fetch(apiUrl);
-    const weatherJson = await weatherPromise.json();
-    const res = weatherJson.data[0];
-    console.log('weatherJsonNow',res);
-    return res;
-  }
+    const date = dateObj.toLocaleString(locale, dateFormatObj);
+    const time = dateObj.toLocaleString(locale, timeFormatObj);
 
-  async getWeatherDailyForCity (cityName) { // получить данные о погоде
-    const weatherApiHelper = new ApiHelper(this.apiConfig.weatherDaily, {lang: this.lang, city: cityName});
-    const apiUrl = weatherApiHelper.getRequestUrl();
-
-    const weatherPromise = await fetch(apiUrl);
-    const weatherJson = await weatherPromise.json();
-    console.log('weatherJson', weatherJson);
+    return { date, time, dateObj };
   }
 
   async getCity() { // получить название города по ip-адресу
@@ -86,15 +291,82 @@ export default class App {
 
     const cityPromise = await fetch(apiUrl);
     const cityJson = await cityPromise.json();
-    console.log('cityJson', cityJson);
-    const timeZone = cityJson.timezone;
-    console.log('timeZone', timeZone);
-    console.log(new Date().toLocaleString("en-US", {timeZone: timeZone}));
-    return cityJson.city;
+    return cityJson;
   }
 
-  renderAllData() {
-    console.log('renderAllData')
+  async getCityParams(cityName) { // получить название города на нужном языке, страну, коорд
+    const cityParamsApiHelper = new ApiHelper(this.apiConfig.opencage, { q: cityName, language: this.lang });
+    const apiUrl = cityParamsApiHelper.getRequestUrl();
+    const cityParamsPromise = await fetch(apiUrl);
+    const cityParamsJson = await cityParamsPromise.json();
+    return cityParamsJson.results[0];
+  }
+
+  async getWeatherNowForCity(cityName) { // получить погоду на текущий момент в указанном городе
+    const weatherApiHelper = new ApiHelper(this.apiConfig.weatherCurrent, { lang: this.lang, city: cityName });
+    const apiUrl = weatherApiHelper.getRequestUrl();
+
+    const weatherPromise = await fetch(apiUrl);
+    const weatherJson = await weatherPromise.json();
+    const res = weatherJson.data[0];
+    return res;
+  }
+
+  async getWeatherDailyForCity(cityName) { // получить данные о погоде на несколько дней в городе
+    const weatherApiHelper = new ApiHelper(this.apiConfig.weatherDaily, { lang: this.lang, city: cityName });
+    const apiUrl = weatherApiHelper.getRequestUrl();
+
+    const weatherPromise = await fetch(apiUrl);
+    const weatherJson = await weatherPromise.json();
+    return weatherJson.data.slice(1, 4);
+  }
+
+
+
+  renderAllData = () => {
+    console.log('renderAllData');
+    const serviceText = this.appConfig.serviceText[this.lang];
+
+    const body = document.querySelector('body');
+    if (this.state.backImg) {
+      body.style.backgroundImage = `url('${this.state.backImg}')`;
+    }
+
+    const cityContainer = document.querySelector(this.appConfig.cityContainer);
+    cityContainer.innerText = `${this.state.city}, ${this.state.country}`;
+
+    const dateContainer = document.querySelector(this.appConfig.dateContainer);
+    dateContainer.innerText = `${this.state.date}, ${this.state.time}`;
+
+    const tempNowContainer = document.querySelector(this.appConfig.tempNowContainer);
+    tempNowContainer.innerText = `${this.state.weatherToday.temp}`;
+
+    const overcastContainer = document.querySelector(this.appConfig.overcastContainer);
+    overcastContainer.innerText = `${this.state.weatherToday.description}`;
+
+    const feelsContainer = document.querySelector(this.appConfig.feelsContainer);
+    feelsContainer.innerText = `${serviceText.feels}: ${this.state.weatherToday.feels}°`;
+
+    const windContainer = document.querySelector(this.appConfig.windContainer);
+    windContainer.innerText = `${serviceText.wind}: ${this.state.weatherToday.wind} ${serviceText.vel}`;
+
+    const humidityContainer = document.querySelector(this.appConfig.humidityContainer);
+    humidityContainer.innerText = `${serviceText.humidity}: ${this.state.weatherToday.humidity}%`;
+
+    const weatherTomorrowContainers = document.querySelectorAll(this.appConfig.dayContainer);
+    weatherTomorrowContainers.forEach((item, index) => {
+      const dayTemp = item.querySelector(this.appConfig.dayTempContainer);
+      const dayName = item.querySelector(this.appConfig.dayNameContainer);
+      dayTemp.innerText = `${this.state.weather3Days[index].roundTemp}°`;
+      dayName.innerText = `${this.state.weather3Days[index].weekday}`;
+    });
+
+    const latitudeContainer = document.querySelector(this.appConfig.latitudeContainer);
+    latitudeContainer.innerText = `${serviceText.latitude}: ${this.state.lat}`;
+
+    const longitudeContainer = document.querySelector(this.appConfig.longitudeContainer);
+    longitudeContainer.innerText = `${serviceText.longitude}: ${this.state.lng}`;
+
   }
 
   // getUserLocation() {

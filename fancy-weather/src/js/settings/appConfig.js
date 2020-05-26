@@ -6,6 +6,39 @@ export default {
       units: 'M',
     },
 
+    languagesCodes: {
+      en: 'en-US',
+      ru: 'ru-RU',
+      be: 'be-BY',
+    },
+
+    serviceText: {
+      en: {
+        feels: 'Feels like',
+        wind: 'Wind',
+        humidity: 'Humidity',
+        vel: 'm/s',
+        latitude: 'latitude',
+        longitude: 'longitude',
+      },
+      ru: {
+        feels: 'По ощущению',
+        wind: 'Ветер',
+        humidity: 'Влажность',
+        vel: 'м/с',
+        latitude: 'широта',
+        longitude: 'долгота',
+      },
+      be: {
+        feels: 'АДЧУВАЕЦЦА ЯК',
+        wind: 'ВЕЦЕР',
+        humidity: 'ВІЛЬГОТНАСЦЬ',
+        vel: 'м/с',
+        latitude: 'Шырата',
+        longitude: 'Даўгата',
+      },
+    },
+
     // containers selectors
     cityContainer: '.city',
     dateContainer: '.date',
@@ -16,6 +49,8 @@ export default {
     humidityContainer: '.humidity',
     daysContainer: '.weather__3days',
     dayContainer: '.weather__tomorrow',
+    dayTempContainer: '.temperature__value',
+    dayNameContainer: '.weekday__name',
     mapContainer: '.location__map',
     latitudeContainer: '.latitude',
     longitudeContainer: '.longitude',
