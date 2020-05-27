@@ -5,7 +5,7 @@ import ApiHelper from './apiHelper';
 // import moduleConfig from './keyboard/settings/moduleConfig';
 // import keysConfig from './keyboard/settings/keysConfig';
 
-// import dummyImg from '../../img/dummy.jpg'; // для webpack
+import dummyImg from '../../img/bg1.jpg'; // для webpack
 
 export default class App {
   constructor(appConfig, apiConfig) {
@@ -15,6 +15,8 @@ export default class App {
     this.lang = null; // язык приложения
     this.units = null; // система измерений приложения
     this.timerId = null;
+    this.error = null;
+    this.map = null;
     // this.timezone = null; 
   }
 
@@ -23,6 +25,10 @@ export default class App {
     this.addListeners();
 
     const dataObj = await this.getAllDataFromApis();
+    // const dataObj = await this.getAllDataFromApis('Moscow');
+    // const dataObj = await this.getAllDataFromApis('Razvilka');
+    // const dataObj = await this.getAllDataFromApis('Vidnoye');
+
     // this.renderAllData();
 
   }
@@ -31,6 +37,16 @@ export default class App {
     const body = document.querySelector('body');
     body.addEventListener('stateUpdated', this.render);
     body.addEventListener('mounted', this.runTimer);
+
+    const reloadButton = document.querySelector(this.appConfig.reloadButton);
+    reloadButton.addEventListener('click', this.reloadPic);
+
+    const searchButton = document.querySelector(this.appConfig.searchButton);
+    searchButton.addEventListener('click', this.processSearch);
+
+    const searchInput = document.querySelector(this.appConfig.searchInput);
+    searchInput.addEventListener('keyup', this.pushEnter);
+
 
     // const search = document.querySelector('.search__button');
     // search.addEventListener('click', this.stopTimer);
@@ -42,6 +58,35 @@ export default class App {
 
     //   const lensIcon = document.querySelector(this.appConfig.lensIconSelector);
     //   lensIcon.addEventListener('click', () => this.search());
+  }
+
+  pushEnter = (e) => { // поиск по нажатию Enter на физической клавиатуре
+    e.preventDefault();
+    if (e.keyCode === 13) {
+      this.processSearch();
+    }
+  }
+
+  processSearch = async () => { // поиск по населенному пункту
+    console.log('click search')
+    const searchInput = document.querySelector(this.appConfig.searchInput);
+    const searchVal = searchInput.value;
+
+    if (!searchVal) {
+      return;
+    }
+
+    await this.getAllDataFromApis(searchVal);
+  }
+
+  reloadPic = async () => { // обновить фоновую картинку
+    const tags = (this.state.tags) ? this.state.tags : this.appConfig.defaults.tags;
+    const newImg = await this.getFlickrImgByTags(tags);
+    this.state.backImg = newImg;
+    const body = document.querySelector('body');
+    if (this.state.backImg) {
+      body.style.backgroundImage = `${this.appConfig.opacityStyle}, url('${this.state.backImg}')`;
+    }
   }
 
   runTimer = () => { // запустить таймер (часы)
@@ -67,37 +112,99 @@ export default class App {
     this.units = this.appConfig.defaults.units;
   }
 
-  async getAllDataFromApis() { // получить все данные от API - город, дата/время, погода, карта
+  getTownNameFromComponents(compObj) { // получить название нас. пункта из объекта
+    let cityName = '';
+    switch (true) {
+      case ('city' in compObj):
+        cityName = compObj.city;
+        break;
+      case ('town' in compObj):
+        cityName = compObj.town;
+        break;
+      case ('village' in compObj):
+        cityName = compObj.village;
+        break;
+      case ('state' in compObj):
+        cityName = compObj.state;
+        break;
+      case ('state_district' in compObj):
+        cityName = compObj.state_district;
+        break;
+      case ('village' in compObj):
+        cityName = compObj.village;
+        break;
+      case ('river' in compObj):
+        cityName = compObj.river;
+        break;
+      case ('beauty' in compObj):
+        cityName = compObj.beauty;
+        break;
+      case ('neighborhood' in compObj):
+        cityName = compObj.neighborhood;
+        break;
+      case ('suburb' in compObj):
+        cityName = compObj.suburb;
+        break;
+      default:
+        cityName = compObj.county;
+        break;
+    }
+    return cityName;
+  }
+
+  async getAllDataFromApis(townName = null) { // получить все данные от API - город, дата/время, погода, карта
     let state = {};
 
-    const cityObj = await this.getCity();
-    console.log('cityObj', cityObj);
-    const { city: cityName, timezone } = cityObj;
-    console.log('cityName', cityName);
+    const cityName = (townName) ? townName : await this.getCityByGeoLocation();
+
+    const cityParams = await this.getCityParams(cityName);
+    console.log('cityParams', cityParams);
+
+    const { components, geometry: { lat, lng }, annotations: { timezone: { name: timezone } } } = cityParams;
+    const name = this.getTownNameFromComponents(components);
+    const { country } = components;
+    console.log('name', name);
+    console.log('country', country);
+    console.log('lat', lat);
+    console.log('lng', lng);
     console.log('timezone', timezone);
 
-    const { date, time, dateObj } = this.getDateTimeByTimezone(timezone);
-    console.log('date', date);
-    console.log('time', time);
-    console.log('dateObj', dateObj); //
+    // const { city: cityName, timezone } = cityObj;
+    // console.log('cityName', cityName);
+    // console.log('timezone', timezone);
+
+
 
     // setInterval(() => {
     //   const {time} = this.getDateTimeByTimezone(timezone);
     //   console.log('time', time);
     // }, 1000);
 
-    const cityParams = await this.getCityParams(cityName);
-    console.log('cityParams', cityParams);
+    // РАБОЧИЙ КОД - РАСКОММЕНТИТЬ ВСЁ!
+    // const cityParams = await this.getCityParams(cityName);
+    // console.log('cityParams', cityParams);
 
-    const { components: { town: name, country }, geometry: { lat, lng } } = cityParams;
-    console.log('cityName from cityParams', name);
-    console.log('country from cityParams', country);
+    const { date, time, dateObj } = this.getDateTimeByTimezone(timezone);
+    console.log('date', date);
+    console.log('time', time);
+    console.log('dateObj', dateObj);
+
+    // const { components: { town: name, country }, geometry: { lat, lng } } = cityParams;
+    // console.log('cityName from cityParams', name);
+    // console.log('country from cityParams', country);
+
     const corLat = this.correctCoords(lat);
     const corLng = this.correctCoords(lng);
     console.log('lat from cityParams', corLat);
     console.log('lng from cityParams', corLng);
 
-    const weatherNow = await this.getWeatherNowForCity(cityName);
+    // const weatherNow = await this.getWeatherNowForCity(cityName);
+    const weatherNow = await this.getWeatherNowForCity(name);
+
+    if (!weatherNow && this.error) {
+      console.log(this.error);
+      return;
+    }
     console.log('weatherNow', weatherNow);
     const { temp, app_temp: feelsLike, wind_spd: wind, rh: humidity, weather: { description } } = weatherNow;
     const roundTemp = Math.round(temp);
@@ -113,14 +220,12 @@ export default class App {
     const tags = this.getTagsString(dateObj, description);
     console.log('tags', tags);
 
-    const weatherDaily = await this.getWeatherDailyForCity(cityName);
+    // const weatherDaily = await this.getWeatherDailyForCity(cityName);
+    const weatherDaily = await this.getWeatherDailyForCity(name);
     const weather3Days = this.destructWeatherFor3Days(weatherDaily);
-    // const weather3Days = weatherDaily.map((weatherForDay))
-    // const datesAfterArr = this.getAfterDates(dateObj);
     console.log('weather3Days', weather3Days);
 
     const backImg = await this.getFlickrImgByTags(tags);
-    // const backImg = await this.getFlickrImgByTags('spring');
 
     console.log('backImg', backImg); //
 
@@ -130,8 +235,10 @@ export default class App {
       date,
       time,
       timezone,
-      lat: corLat,
-      lng: corLng,
+      lat,
+      lng,
+      corLat,
+      corLng,
       weatherToday: {
         temp: roundTemp,
         feels: roundFeels,
@@ -141,10 +248,13 @@ export default class App {
       },
       weather3Days,
       backImg,
+      tags,
     };
     console.log('state', state);
 
     this.setState(state);
+
+    // РАБОЧИЙ КОД
   }
 
   setState(state) { // установить глобальное состояние приложения
@@ -177,7 +287,7 @@ export default class App {
     console.log('photos', photos);
     const photoObj = (photos.length) ? photos[Math.floor(Math.random() * photos.length)] : null;
     if (!photoObj) {
-      return null;
+      return '../../img/bg1.jpg';
     }
     // console.log('photoObj', photoObj);
     const imgUrl = await this.getFarmImg(photoObj);
@@ -223,7 +333,7 @@ export default class App {
   getDayTime(dayHour) { // получить название времени суток
     let dayTime = '';
     switch (true) {
-      case dayHour <= 6:
+      case dayHour <= 5:
         dayTime = 'night';
         break;
       case dayHour <= 10:
@@ -252,21 +362,13 @@ export default class App {
     return { roundTemp, weekday, description, code };
   }
 
-  getAfterDates(dateObj) {
-    console.log('today', dateObj);
-    dateObj.setDate(dateObj.getDate() + 1);
-    console.log('tomorrow', `${dateObj.getFullYear()}-${dateObj.getMonth() + 1}-${dateObj.getDate()}`); //
-    // console.logt('tomorrow', dateObj.toISOString().slice(0,10));
-    // console.log('after tomorrow', dateObj.addDays(2).toString("dd-mm-yyyy"));
-    // console.log(new Date(date));
-  }
-
   getDateTimeByTimezone(timeZone) {
     const dateFormatObj = {
       month: 'short',
       day: '2-digit',
       weekday: 'short',
       timeZone: timeZone,
+
     };
 
     const timeFormatObj = {
@@ -274,24 +376,27 @@ export default class App {
       minute: 'numeric',
       second: 'numeric',
       hour12: false,
+      timeZone: timeZone,
     };
 
     const locale = this.appConfig.languagesCodes[this.lang];
     const dateObj = new Date();
 
-    const date = dateObj.toLocaleString(locale, dateFormatObj);
+    const date = dateObj.toLocaleString(locale, dateFormatObj).replace(',', '');
     const time = dateObj.toLocaleString(locale, timeFormatObj);
 
     return { date, time, dateObj };
   }
 
-  async getCity() { // получить название города по ip-адресу
+  async getCityByGeoLocation() { // получить название города по ip-адресу
     const cityApiHelper = new ApiHelper(this.apiConfig.geolocation);
     const apiUrl = cityApiHelper.getRequestUrl();
 
     const cityPromise = await fetch(apiUrl);
     const cityJson = await cityPromise.json();
-    return cityJson;
+    // return cityJson;
+    return cityJson.city;
+
   }
 
   async getCityParams(cityName) { // получить название города на нужном языке, страну, коорд
@@ -299,17 +404,34 @@ export default class App {
     const apiUrl = cityParamsApiHelper.getRequestUrl();
     const cityParamsPromise = await fetch(apiUrl);
     const cityParamsJson = await cityParamsPromise.json();
+    console.log('cityParamsJson', cityParamsJson);
     return cityParamsJson.results[0];
   }
 
   async getWeatherNowForCity(cityName) { // получить погоду на текущий момент в указанном городе
     const weatherApiHelper = new ApiHelper(this.apiConfig.weatherCurrent, { lang: this.lang, city: cityName });
     const apiUrl = weatherApiHelper.getRequestUrl();
-
-    const weatherPromise = await fetch(apiUrl);
-    const weatherJson = await weatherPromise.json();
-    const res = weatherJson.data[0];
-    return res;
+    try {
+      // const weatherPromise = await fetch(apiUrl);
+      const weatherPromise = await fetch(`${this.apiConfig.proxyApi}${apiUrl}`, {
+        headers: { origin: '' },
+      });
+      const { status, statusText } = weatherPromise;
+      if (status !== 200) {
+        this.error = statusText;
+        return null;
+      }
+      const weatherJson = await weatherPromise.json();
+      const res = weatherJson.data[0];
+      return res;
+    } catch (e) {
+      this.error = e;
+      return null;
+    }
+    // const weatherPromise = await fetch(apiUrl);
+    // const weatherJson = await weatherPromise.json();
+    // const res = weatherJson.data[0];
+    // return res;
   }
 
   async getWeatherDailyForCity(cityName) { // получить данные о погоде на несколько дней в городе
@@ -329,7 +451,10 @@ export default class App {
 
     const body = document.querySelector('body');
     if (this.state.backImg) {
-      body.style.backgroundImage = `url('${this.state.backImg}')`;
+      // body.style.backgroundImage = `url('${this.state.backImg}')`;
+      // body.style.backgroundImage = `linear-gradient(to bottom, rgba(0,0,0,0.6) 0%,rgba(0,0,0,0.6) 100%), url('${this.state.backImg}')`;
+      body.style.backgroundImage = `${this.appConfig.opacityStyle}, url('${this.state.backImg}')`;
+
     }
 
     const cityContainer = document.querySelector(this.appConfig.cityContainer);
@@ -362,11 +487,34 @@ export default class App {
     });
 
     const latitudeContainer = document.querySelector(this.appConfig.latitudeContainer);
-    latitudeContainer.innerText = `${serviceText.latitude}: ${this.state.lat}`;
+    latitudeContainer.innerText = `${serviceText.latitude}: ${this.state.corLat}`;
 
     const longitudeContainer = document.querySelector(this.appConfig.longitudeContainer);
-    longitudeContainer.innerText = `${serviceText.longitude}: ${this.state.lng}`;
+    longitudeContainer.innerText = `${serviceText.longitude}: ${this.state.corLng}`;
 
+    this.generateMapFromState();
+  }
+
+  generateMapFromState() { // нарисовать карту
+    mapboxgl.accessToken = this.apiConfig.mapbox.token;
+    this.map = new mapboxgl.Map({
+      container: 'map',
+      style: 'mapbox://styles/mapbox/streets-v11',
+      center: [this.state.lng, this.state.lat],
+      zoom: 10,
+    });
+    (new mapboxgl.Marker()).setLngLat([this.state.lng, this.state.lat]).addTo(this.map);
+  }
+
+  generateMapFromCoords(lng, lat) { // нарисовать карту
+    mapboxgl.accessToken = this.apiConfig.mapbox.token;
+    this.map = new mapboxgl.Map({
+      container: 'map',
+      style: 'mapbox://styles/mapbox/streets-v11',
+      center: [lng, lat],
+      zoom: 10,
+    });
+    (new mapboxgl.Marker()).setLngLat([lng, lat]).addTo(this.map);
   }
 
   // getUserLocation() {

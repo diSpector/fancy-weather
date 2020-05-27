@@ -19,19 +19,21 @@ export default {
         weatherDaily: {
             url: 'https://api.weatherbit.io/v2.0/forecast/daily?',
             params: {
-                key: '9cdf299171544412be174b94e11dd47f',
+                // key: '9cdf299171544412be174b94e11dd47f',
+                key: '209d602ed65944f5ac3de85bf8b00f43',
                 lang: 'en',
                 units: 'M', // metric, F - Fahrenheit,
                 days: 5,
                 city: 'Moscow',
             },
         },
-
+        
         weatherCurrent: {
             url: 'https://api.weatherbit.io/v2.0/current?',
             params: {
                 city: 'Moscow',
-                key: '9cdf299171544412be174b94e11dd47f',
+                // key: '9cdf299171544412be174b94e11dd47f',
+                key: '209d602ed65944f5ac3de85bf8b00f43',
                 lang: 'en',
                 units: 'M', // metric, F - Fahrenheit,
             }
@@ -65,9 +67,11 @@ export default {
             params: {
                 q: 'Minsk',
                 pretty: 1,
-                no_annotations: 1,
+                // no_annotations: 1,
                 key: '8114533ae47e43bbb81149a84de22e25',
             },
         },
+
+        proxyApi: 'https://cors-anywhere.herokuapp.com/',
     },
 }

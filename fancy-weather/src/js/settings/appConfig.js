@@ -4,6 +4,7 @@ export default {
     defaults: {
       language: 'en',
       units: 'M',
+      tags: 'summer,day',
     },
 
     languagesCodes: {
@@ -40,6 +41,9 @@ export default {
     },
 
     // containers selectors
+    reloadButton: '.button__reload',
+    searchButton: '.search__button',
+    searchInput: '.search__input input',
     cityContainer: '.city',
     dateContainer: '.date',
     tempNowContainer: '.today__temperature',
@@ -54,6 +58,9 @@ export default {
     mapContainer: '.location__map',
     latitudeContainer: '.latitude',
     longitudeContainer: '.longitude',
+
+    // css
+    opacityStyle: 'linear-gradient(to bottom, rgba(0,0,0,0.6) 0%,rgba(0,0,0,0.6) 100%)',
 
     // omdb: {
     // //   apiKey: 'c3168632',
