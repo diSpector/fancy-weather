@@ -22,7 +22,7 @@ export default {
                 // key: '9cdf299171544412be174b94e11dd47f',
                 key: '209d602ed65944f5ac3de85bf8b00f43',
                 lang: 'en',
-                units: 'M', // metric, F - Fahrenheit,
+                units: 'M', // metric, I - Fahrenheit,
                 days: 5,
                 city: 'Moscow',
             },
@@ -35,7 +35,7 @@ export default {
                 // key: '9cdf299171544412be174b94e11dd47f',
                 key: '209d602ed65944f5ac3de85bf8b00f43',
                 lang: 'en',
-                units: 'M', // metric, F - Fahrenheit,
+                units: 'M', // metric, I - Fahrenheit,
             }
 
         },

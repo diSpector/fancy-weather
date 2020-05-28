@@ -13,12 +13,21 @@ export default {
       be: 'be-BY',
     },
 
+    placeholderText: {
+      en: 'Search city...',
+      ru: 'Искать город...',
+      be: 'Шукаць горад...',
+    },
+
     serviceText: {
       en: {
         feels: 'Feels like',
         wind: 'Wind',
         humidity: 'Humidity',
-        vel: 'm/s',
+        vel: {
+          M: 'm/s',
+          I: 'mph',
+        },
         latitude: 'latitude',
         longitude: 'longitude',
       },
@@ -26,7 +35,10 @@ export default {
         feels: 'По ощущению',
         wind: 'Ветер',
         humidity: 'Влажность',
-        vel: 'м/с',
+        vel: {
+          M: 'м/с',
+          I: 'м/ч',
+        },
         latitude: 'широта',
         longitude: 'долгота',
       },
@@ -34,16 +46,27 @@ export default {
         feels: 'АДЧУВАЕЦЦА ЯК',
         wind: 'ВЕЦЕР',
         humidity: 'ВІЛЬГОТНАСЦЬ',
-        vel: 'м/с',
+        vel: {
+          M: 'м/с',
+          I: 'м/ч',
+        },
         latitude: 'Шырата',
         longitude: 'Даўгата',
       },
     },
 
     // containers selectors
+    loaderSelector: '.loader',
+    langsContainer: '.button__lang',
+    langsMenu: '.lang__alllangs',
+    langSpec: '.alllangs',
+    langValueContainer: '.lang__value',
+    unitsContainer: '.button__temp',
+    unitSpec: '.temptype',
     reloadButton: '.button__reload',
     searchButton: '.search__button',
     searchInput: '.search__input input',
+    errorContainer: '.error__block',
     cityContainer: '.city',
     dateContainer: '.date',
     tempNowContainer: '.today__temperature',
@@ -58,6 +81,24 @@ export default {
     mapContainer: '.location__map',
     latitudeContainer: '.latitude',
     longitudeContainer: '.longitude',
+
+    // errors
+    errors: {
+      noCityFound: { // пустой results от opencage
+        en: `There aren't cities. Please, fix search phrase`,
+        ru: `По вашему запросу ничего не найдено. Пожалуйста, исправьте запрос`,
+        be: `Па вашаму запыту нічога не знойдзена, калі ласка, выпраўце запыт`,
+      },
+
+      noWeatherFound: { // статус 204 от weatherbit
+        en: `There isn't weather data for the city. Please, fix search phrase`,
+        ru: `По вашему запросу нет данных о погоде. Пожалуйста, исправьте запрос`,
+        be: `Па вашаму запыту няма дадзеных пра надвор'е. Калі ласка, выпраўце запыт`,
+      },
+    },
+
+
+
 
     // css
     opacityStyle: 'linear-gradient(to bottom, rgba(0,0,0,0.6) 0%,rgba(0,0,0,0.6) 100%)',

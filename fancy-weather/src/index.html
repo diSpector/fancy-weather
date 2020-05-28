@@ -17,6 +17,7 @@
 </head>
 
 <body>
+    <div class="loader"></div>
     <div class="container">
         <div class="controls">
             <div class="buttons">
@@ -24,27 +25,29 @@
                     <div class="icon__reload"></div>
                 </div>
                 <div class="button button__lang">
-                    <div class="lang__value">EN</div>
+                    <div class="lang__value">en</div>
                     <div class="lang__select">
                         <div class="arrow down"></div>
                         <div class="lang__alllangs hidden">
-                            <div class="alllangs be">BE</div>
-                            <div class="alllangs en active">EN</div>
-                            <div class="alllangs ru">RU</div>
+                            <div class="alllangs be">be</div>
+                            <div class="alllangs en active">en</div>
+                            <div class="alllangs ru">ru</div>
                         </div>
                     </div>
                 </div>
                 <div class="button button__temp">
-                    <div class="temptype fahrentgeit inactive">F</div>
-                    <div class="temptype celsius">C</div>
+                    <!-- <div class="temptype fahrentgeit inactive">F</div> -->
+                    <div class="temptype fahrentgeit">F</div>
+                    <div class="temptype celsius active">C</div>
                 </div>
             </div>
             <div class="search">
                 <div class="search__input">
-                    <input type="text" name="" id="" placeholder="Search city or ZIP">
+                    <input type="text" name="" id="" placeholder="Search city">
                     <div class="mic"></div>
                 </div>
                 <div class="search__button">Search</div>
+                <div class="error__block hidden"></div>
             </div>
         </div>
 
