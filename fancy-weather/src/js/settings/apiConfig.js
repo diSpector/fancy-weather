@@ -24,20 +24,19 @@ export default {
                 lang: 'en',
                 units: 'M', // metric, I - Fahrenheit,
                 days: 5,
-                city: 'Moscow',
+                // city: 'Moscow',
             },
         },
         
         weatherCurrent: {
             url: 'https://api.weatherbit.io/v2.0/current?',
             params: {
-                city: 'Moscow',
                 // key: '9cdf299171544412be174b94e11dd47f',
                 key: '209d602ed65944f5ac3de85bf8b00f43',
                 lang: 'en',
                 units: 'M', // metric, I - Fahrenheit,
+                // city: 'Moscow',
             }
-
         },
 
         flickr: {

@@ -2,7 +2,6 @@ export default class ApiHelper {
     constructor(configObj, newParams = null) {
       this.configObj = configObj;
       this.newParams = newParams;
-    //   this.params = {};
     }
 
     getRequestUrl() { // вернуть запрос для доступа к API
@@ -13,9 +12,6 @@ export default class ApiHelper {
     }
 
     getParams() { // установить пар-ры - добавить/заменить или оставить без изменения
-        // this.params = (this.newParams) ? 
-        //     {...this.configObj.params, ...this.newParams}
-        //     : this.this.configObj.params;
         return (this.newParams) ? 
             {...this.configObj.params, ...this.newParams}
             : this.configObj.params;

@@ -19,6 +19,45 @@ export default {
       be: 'Шукаць горад...',
     },
 
+    translations: {
+      weekdays: {
+        full: [
+          'нядзеля',
+          'панядзелак',
+          'аўторак',
+          'серада',
+          'чацвер',
+          'пятніца',
+          'субота',
+        ],
+        short: [
+          'нд',
+          'пн',
+          'аў',
+          'ср',
+          'чц',
+          'пт',
+          'сб',
+        ]
+      },
+      monthes: {
+        full: [
+          'студзеня',
+          'лютага',
+          'сакавіка',
+          'красавіка',
+          'мая',
+          'чэрвеня',
+          'ліпеня',
+          'жніўня',
+          'верасня',
+          'кастрычніка',
+          'лістапада',
+          'снежні',
+        ],
+      }
+    },
+
     serviceText: {
       en: {
         feels: 'Feels like',
@@ -59,10 +98,7 @@ export default {
     loaderSelector: '.loader',
     langsContainer: '.button__lang',
     langsMenu: '.lang__alllangs',
-    langSpec: '.alllangs',
-    langValueContainer: '.lang__value',
     unitsContainer: '.button__temp',
-    unitSpec: '.temptype',
     reloadButton: '.button__reload',
     searchButton: '.search__button',
     searchInput: '.search__input input',
@@ -82,8 +118,33 @@ export default {
     latitudeContainer: '.latitude',
     longitudeContainer: '.longitude',
 
+    unitsObj: {
+      container: '.button__temp',
+      spec: '.temptype',
+      data: 'units',
+    },
+
+    langObj: {
+      container: '.button__lang',
+      spec: '.alllangs',
+      data: 'lang',
+      value: '.lang__value',
+    },
+
     // errors
     errors: {
+      userGeoLocationError: { // ошибка ipinfo.io
+        en: `Could not locate you. Please try again later.`,
+        ru: `Не удалось определить ваше местоположение. Пожалуйста, попробуйте позже`,
+        be: `Не атрымалася вызначыць ваша месцазнаходжанне. Калі ласка, паспрабуйце пазней`,
+      },
+
+      userCityError: { // ошибка opencage
+        en: `Error retrieving city data`,
+        ru: `Ошибка при получении данных о населенном пункте`,
+        be: `Памылка пры атрыманні дадзеных аб населеным пункце`,
+      },
+
       noCityFound: { // пустой results от opencage
         en: `There aren't cities. Please, fix search phrase`,
         ru: `По вашему запросу ничего не найдено. Пожалуйста, исправьте запрос`,
@@ -95,34 +156,15 @@ export default {
         ru: `По вашему запросу нет данных о погоде. Пожалуйста, исправьте запрос`,
         be: `Па вашаму запыту няма дадзеных пра надвор'е. Калі ласка, выпраўце запыт`,
       },
+
+      imgApiError: { // ошибка от Flickr
+        en: `Error getting picture`,
+        ru: `Ошибка при получении картинки`,
+        be: `Памылка пры атрыманні карцінкі`,
+      }
     },
-
-
-
 
     // css
     opacityStyle: 'linear-gradient(to bottom, rgba(0,0,0,0.6) 0%,rgba(0,0,0,0.6) 100%)',
-
-    // omdb: {
-    // //   apiKey: 'c3168632',
-    //   apiKey: 'e7b6ede6',
-    //   apiUrl: 'https://www.omdbapi.com/?',
-    // },
-
-    // moviesContainer: '.movies',
-    // loaderSelector: '.loader',
-    // searchTextContainer: '.search__text',
-    // errorTextContainer: '.search__error',
-    // glideSelector: '.glide',
-    // searchInputId: 'search-input',
-    // favoriteContainer: '.favorites',
-    // favoriteMoviesContainer: '.favorites__movies',
-    // keyboardContainer: '.keyboard',
-
-    // // icons/buttons selectors
-    // resetIconSelector: '.close__icon',
-    // keyboardIconSelector: '.keyboard__icon',
-    // lensIconSelector: '.search__icon',
-    // searchButtonIconSelector: '.search__button',
   },
 };

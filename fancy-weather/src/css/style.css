@@ -209,7 +209,18 @@ body {
     width: 50%;
 }
 
-.fahrentgeit {
+.temptype:first-child {
+    border-top-left-radius: 5px;
+    border-bottom-left-radius: 5px;
+}
+
+.temptype:last-child {
+    border-top-right-radius: 5px;
+    border-bottom-right-radius: 5px;
+}
+
+
+/* .fahrentgeit {
     border-top-left-radius: 5px;
     border-bottom-left-radius: 5px; 
 }
@@ -217,7 +228,7 @@ body {
 .celsius {
     border-top-right-radius: 5px;
     border-bottom-right-radius: 5px;
-}
+} */
 
 .search {
     width: 375px;
