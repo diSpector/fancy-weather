@@ -1,5 +1,7 @@
 import ApiHelper from './apiHelper';
 import dummyImg from '../../img/bg1.jpg'; // для webpack
+// import mapboxgl from 'mapbox-gl/dist/mapbox-gl.js';
+// import mapboxgl from 'https://api.mapbox.com/mapbox-gl-js/v1.10.1/mapbox-gl.js';
 
 // import Slider from './slider';
 // import KeyboardModule from './keyboard/keyboard_module';
@@ -17,13 +19,53 @@ export default class App {
     this.timerId = null;
     this.error = null;
     this.map = null;
-    // this.timezone = null; 
+    // this.timezone = null;
   }
 
   async init() { // первоначальный рендеринг
-    this.setDefaults();
+    this.setInitSettings();
     this.addListeners();
     await this.getData();
+  }
+
+  setInitSettings() { // получить значения языка/ед. изм., установить св-ва, заполнить меню
+    this.loadUserSettings();
+    this.setHtmlSetting();
+  }
+
+  setHtmlSetting() { // проставить начальные значения в меню (ед. изм., язык)
+    this.updateHtml(this.appConfig.unitsObj, this.units);
+    this.updateHtml(this.appConfig.langObj, this.lang);
+  }
+
+  loadUserSettings() { // загрузить данные о языке и ед. изм. из localStorage
+    let userSettings = JSON.parse(localStorage.getItem('dsWeatherData'));
+    if (!userSettings) {
+      userSettings = {
+        lang: this.appConfig.defaults.language,
+        units: this.appConfig.defaults.units,
+      };
+
+      localStorage.setItem('dsWeatherData', JSON.stringify(userSettings));
+    }
+    // console.log('localStorage', JSON.parse(localStorage.getItem('dsWeatherData')));
+    this.lang = userSettings.lang;
+    this.units = userSettings.units;
+  }
+
+  saveUserSettings(key, value) { // сохранить настройки в localStorage
+    let userSettings = JSON.parse(localStorage.getItem('dsWeatherData'));
+
+    if (!userSettings) {
+      userSettings = {
+        lang: this.appConfig.defaults.language,
+        units: this.appConfig.defaults.units,
+      };
+    }
+    userSettings[key] = value;
+    localStorage.setItem('dsWeatherData', JSON.stringify(userSettings));
+    // console.log('localStorage', JSON.parse(localStorage.getItem('dsWeatherData')));
+
   }
 
   addListeners() { // установить слушатели событий
@@ -80,6 +122,7 @@ export default class App {
       return;
     }
     const htmlObj = this.appConfig.unitsObj;
+    this.saveUserSettings('units', newUnits);
     this.updateHtml(htmlObj, newUnits);
     this.updateApp(htmlObj.data, newUnits);
   }
@@ -90,6 +133,7 @@ export default class App {
       return;
     }
     const htmlObj = this.appConfig.langObj;
+    this.saveUserSettings('lang', newLang);
     this.updateHtml(htmlObj, newLang);
     this.updateApp(htmlObj.data, newLang);
   }
@@ -138,8 +182,8 @@ export default class App {
     if (!searchVal) {
       return;
     }
-
-    if (this.state.city && (searchVal.toUpperCase() === this.state.city.toUpperCase())) { // если город тот же
+    // если город тот же
+    if (this.state.city && (searchVal.toUpperCase() === this.state.city.toUpperCase())) {
       return;
     }
 
@@ -165,7 +209,7 @@ export default class App {
     }, 1000);
   }
 
-  stopTimer = () => { // уничтожить таймер 
+  stopTimer = () => { // уничтожить таймер
     if (this.timerId) {
       clearInterval(this.timerId);
     }
@@ -189,9 +233,6 @@ export default class App {
         break;
       case ('town' in compObj):
         cityName = compObj.town;
-        break;
-      case ('village' in compObj):
-        cityName = compObj.village;
         break;
       case ('state' in compObj):
         cityName = compObj.state;
@@ -221,7 +262,8 @@ export default class App {
     return cityName;
   }
 
-  async getData(townName = null, isUpdImg = true, isUpdMap = true, isSearchByCoords = false) { // запросить данные у всех API
+  // запросить данные у всех API
+  async getData(townName = null, isUpdImg = true, isUpdMap = true, isSearchByCoords = false) {
     this.enableLoader();
 
     const data = await this.getAllDataFromApis(townName, isUpdImg, isUpdMap, isSearchByCoords);
@@ -236,70 +278,77 @@ export default class App {
     this.disableLoader();
   }
 
-  async getAllDataFromApis(townName, isUpdImg, isUpdMap, isSearchByCoords) { // получить все данные от API - город, дата/время, погода, карта
-    // API - получить название города (геолокация или из аргументов) 
-    const cityName = (townName) ? townName : await this.getCityByGeoLocation();
+  // получить все данные от API - город, дата/время, погода, карта
+  async getAllDataFromApis(townName, isUpdImg, isUpdMap, isSearchByCoords) {
+    // API - получить название города (геолокация или из аргументов)
+    const cityName = (townName) || await this.getCityByGeoLocation();
     if (this.error) {
-      return;
+      return null;
     }
 
     // API - получить пар-ры города - название, страна, пояс, широта, долгота
     const searchParam = (!isSearchByCoords) ? cityName : this.getCoordsFromState();
     const cityParams = await this.getCityParams(searchParam);
     if (this.error) {
-      return;
+      return null;
     }
-    console.log('cityParams', cityParams);
+    // console.log('cityParams', cityParams);
 
-    const { components, geometry: { lat, lng }, annotations: { timezone: { name: timezone } } } = cityParams;
+    const {
+      components, geometry: { lat, lng }, annotations: { timezone: { name: timezone } },
+    } = cityParams;
     const name = this.getTownNameFromComponents(components);
     const { country } = components;
 
-    // преобразовать дату и время на основании пояса 
+    // преобразовать дату и время на основании пояса
     const { date, time, dateObj } = this.getDateTimeByTimezone(timezone);
     const corLat = this.correctCoords(lat);
     const corLng = this.correctCoords(lng);
 
-    console.log('TESTcityObj', { name, country, lat, lng, timezone });
-    console.log('TESTdate', { date, time, dateObj });
-    console.log('lat, lng', { corLat, corLng });
+    // console.log('TESTcityObj', {
+    //  name, country, lat, lng, timezone,
+    // });
+    // console.log('TESTdate', { date, time, dateObj });
+    // console.log('lat, lng', { corLat, corLng });
 
     // API - получить погоду для города на текущий момент
-    const searchObj = (!isSearchByCoords) ? { city: cityName} : this.getCoordsFromState(false);
+    const searchObj = (!isSearchByCoords) ? { city: cityName } : this.getCoordsFromState(false);
 
     const weatherNow = await this.getWeatherNowForCity(searchObj);
     if (this.error) {
-      return;
+      return null;
     }
 
-    console.log('weatherNow', weatherNow);
-    const { temp, app_temp: feelsLike, wind_spd: wind, rh: humidity, weather: { description } } = weatherNow;
+    // console.log('weatherNow', weatherNow);
+    const {
+      temp, app_temp: feelsLike, wind_spd: wind, rh: humidity, weather: { description },
+    } = weatherNow;
     const roundTemp = Math.round(temp);
     const roundFeels = Math.round(feelsLike);
     const roundWind = Math.round(wind);
-    const roundHumidity = Math.round(humidity)
+    const roundHumidity = Math.round(humidity);
     const weatherToday = { // собрать все данные о погоде на сегодня в объект
       temp: roundTemp,
       feels: roundFeels,
       wind: roundWind,
       humidity: roundHumidity,
-      description
+      description,
     };
-    console.log('weatherToday', weatherToday);
+    // console.log('weatherToday', weatherToday);
 
     const tags = this.getTagsString(dateObj);
-    console.log('tags', tags);
+    // console.log('tags', tags);
 
     // API - получить погоду для города на 3 дня
     const weatherDaily = await this.getWeatherDailyForCity(searchObj);
-    console.log('weatherDaily', weatherDaily);
+    // console.log('weatherDaily', weatherDaily);
 
     if (this.error) {
-      return;
+      return null;
     }
 
     const weather3Days = this.destructWeatherFor3Days(weatherDaily);
-    console.log('weather3Days', weather3Days);
+    // console.log('weather3Days', weather3Days);
 
     const backImg = (isUpdImg) ? await this.getFlickrImgByTags(tags) : this.state.backImg;
 
@@ -337,7 +386,6 @@ export default class App {
 
       const cityJson = await cityPromise.json();
       return cityJson.city;
-
     } catch (e) {
       this.error = this.appConfig.errors.userGeoLocationError[this.lang];
       return null;
@@ -345,7 +393,9 @@ export default class App {
   }
 
   async getCityParams(cityName) { // получить название города на нужном языке, страну, коорд
-    const cityParamsApiHelper = new ApiHelper(this.apiConfig.opencage, { q: cityName, language: this.lang });
+    const cityParamsApiHelper = new ApiHelper(this.apiConfig.opencage, {
+      q: cityName, language: this.lang,
+    });
     const apiUrl = cityParamsApiHelper.getRequestUrl();
 
     try {
@@ -362,7 +412,6 @@ export default class App {
       }
 
       return cityParamsJson.results[0];
-
     } catch (e) {
       this.error = this.appConfig.errors.userCityError[this.lang];
       return null;
@@ -370,16 +419,18 @@ export default class App {
   }
 
   async getWeatherNowForCity(searchObj) { // получить погоду на текущий момент в указанном городе
-    const weatherApiHelper = new ApiHelper(this.apiConfig.weatherCurrent, { lang: this.lang, units: this.units, ...searchObj });
+    const weatherApiHelper = new ApiHelper(this.apiConfig.weatherCurrent, {
+      lang: this.lang, units: this.units, ...searchObj,
+    });
     const apiUrl = weatherApiHelper.getRequestUrl();
 
     try {
       const weatherPromise = await fetch(apiUrl);
-      console.log('weatherPromise', weatherPromise);
+      // console.log('weatherPromise', weatherPromise);
       // const weatherPromise = await fetch(`${this.apiConfig.proxyApi}${apiUrl}`, {
       //   headers: { origin: '' },
       // });
-      const { status, statusText } = weatherPromise;
+      const { status } = weatherPromise;
       if (status !== 200) {
         this.error = this.appConfig.errors.noWeatherFound[this.lang];
         return null;
@@ -391,7 +442,6 @@ export default class App {
       }
       const res = weatherJson.data[0];
       return res;
-
     } catch (e) {
       this.error = this.appConfig.errors.noWeatherFound[this.lang];
       return null;
@@ -399,7 +449,9 @@ export default class App {
   }
 
   async getWeatherDailyForCity(searchObj) { // получить данные о погоде на несколько дней в городе
-    const weatherApiHelper = new ApiHelper(this.apiConfig.weatherDaily, { lang: this.lang, units: this.units, ...searchObj });
+    const weatherApiHelper = new ApiHelper(this.apiConfig.weatherDaily, {
+      lang: this.lang, units: this.units, ...searchObj,
+    });
     const apiUrl = weatherApiHelper.getRequestUrl();
 
     try {
@@ -418,7 +470,6 @@ export default class App {
         return null;
       }
       return weatherJson.data.slice(1, 4);
-
     } catch (e) {
       this.error = this.appConfig.errors.noWeatherFound[this.lang];
       return null;
@@ -438,8 +489,10 @@ export default class App {
       }
       const imgJson = await imgPromise.json();
       const photos = imgJson.photos.photo;
-      console.log('photos', photos);
-      const photoObj = (photos.length) ? photos[Math.floor(Math.random() * photos.length)] : null;
+      // console.log('photos', photos);
+      const photoObj = (photos.length)
+        ? photos[Math.floor(Math.random() * photos.length)]
+        : null;
       if (!photoObj) {
         return defaultImgUrl;
       }
@@ -448,7 +501,6 @@ export default class App {
         return defaultImgUrl;
       }
       return imgUrl;
-
     } catch (e) {
       // this.error = this.appConfig.errors.imgApiError[this.lang];
       return defaultImgUrl;
@@ -457,29 +509,29 @@ export default class App {
 
   async getFarmImg(photoObj) { // получить url картинки с flickr
     const apiUrl = `https://farm${photoObj.farm}.staticflickr.com/${photoObj.server}/${photoObj.id}_${photoObj.secret}_b.jpg`;
-    
+
     try {
       const imgObj = await fetch(apiUrl);
       return imgObj.url;
-    
     } catch (e) {
       return null;
-    } 
+    }
   }
 
   setState(state) { // установить глобальное состояние приложения
     this.state = state;
   }
 
-  getCoordsFromState(isStr = true) { // получить координаты из стейта, по умолчанию - в строке, иначе - в объекте
-    return (isStr) 
+  // получить координаты из стейта, по умолчанию - в строке, иначе - в объекте
+  getCoordsFromState(isStr = true) {
+    return (isStr)
       ? `${this.state.lat},${this.state.lng}`
-      : { lat: this.state.lat, lon: this.state.lng};
+      : { lat: this.state.lat, lon: this.state.lng };
   }
 
   emitEvent(eventName) { // задиспатчить событие
     const app = document.querySelector('body');
-    let event = new Event(eventName);
+    const event = new Event(eventName);
     app.dispatchEvent(event);
   }
 
@@ -559,13 +611,15 @@ export default class App {
 
   destructWeatherForDay = (weather1Obj) => { // подготовить объект погоды за 1 день
     const locale = this.appConfig.languagesCodes[this.lang];
-    const { temp, valid_date, weather: { description, code } } = weather1Obj;
+    const { temp, valid_date: validDate, weather: { description, code } } = weather1Obj;
     const roundTemp = Math.round(temp);
-    let weekday = (new Date(valid_date)).toLocaleDateString(locale, { weekday: 'long' });
+    let weekday = (new Date(validDate)).toLocaleDateString(locale, { weekday: 'long' });
     if (this.lang === 'be') { // слегка костыльный перевод полного дня недели для бел.яза
-      weekday = this.appConfig.translations.weekdays.full[(new Date(valid_date)).getDay()];
+      weekday = this.appConfig.translations.weekdays.full[(new Date(validDate)).getDay()];
     }
-    return { roundTemp, weekday, description, code };
+    return {
+      roundTemp, weekday, description, code,
+    };
   }
 
   getDateTimeByTimezone(timeZone) { // получить дату и время для текущего часового пояса
@@ -573,7 +627,7 @@ export default class App {
       month: 'short',
       day: '2-digit',
       weekday: 'short',
-      timeZone: timeZone,
+      timeZone,
 
     };
 
@@ -582,7 +636,7 @@ export default class App {
       minute: 'numeric',
       second: 'numeric',
       hour12: false,
-      timeZone: timeZone,
+      timeZone,
     };
 
     const locale = this.appConfig.languagesCodes[this.lang];
@@ -592,7 +646,7 @@ export default class App {
     const time = dateObj.toLocaleString(locale, timeFormatObj);
 
     if (this.lang === 'be') { // немного костыльный перевод месяца/дня недели на бел.яз
-      const corDateObj = (new Date((new Date()).toLocaleDateString('en-US', {timeZone: timeZone})));
+      const corDateObj = (new Date((new Date()).toLocaleDateString('en-US', { timeZone })));
       const weekDay = corDateObj.getDay();
       const monthNum = corDateObj.getMonth();
       const dateNum = corDateObj.getDate();
@@ -604,7 +658,6 @@ export default class App {
   }
 
   renderAllData = () => { // наполнить контейнеры значениями из state
-
     const inputSearch = document.querySelector(this.appConfig.searchInput);
     inputSearch.placeholder = this.appConfig.placeholderText[this.lang];
 
@@ -678,12 +731,13 @@ export default class App {
     (new mapboxgl.Marker()).setLngLat([lng, lat]).addTo(this.map);
   }
 
-  // async getAllDataFromApis(townName = null, isUpdImg = true, isUpdMap = true) { // получить все данные от API - город, дата/время, погода, карта
+  // получить все данные от API - город, дата/время, погода, карта
+  // async getAllDataFromApis(townName = null, isUpdImg = true, isUpdMap = true) {
   //   this.enableLoader();
   //   let state = {};
   //   console.log('townName', townName);
 
-  //   // API - получить название города (геолокация или из аргументов) 
+  //   // API - получить название города (геолокация или из аргументов)
   //   const cityName = (townName) ? townName : await this.getCityByGeoLocation();
 
   //   // API - получить пар-ры города - название, страна, пояс, широта, долгота
@@ -696,7 +750,9 @@ export default class App {
   //     return;
   //   }
 
-  //   const { components, geometry: { lat, lng }, annotations: { timezone: { name: timezone } } } = cityParams;
+  //   const {
+  //    components, geometry: { lat, lng }, annotations: { timezone: { name: timezone } }
+  //    } = cityParams;
   //   const name = this.getTownNameFromComponents(components);
   //   const { country } = components;
   //   console.log('name', name);
@@ -705,7 +761,7 @@ export default class App {
   //   console.log('lng', lng);
   //   console.log('timezone', timezone);
 
-  //   // преобразовать дату и время на основании пояса 
+  //   // преобразовать дату и время на основании пояса
   //   const { date, time, dateObj } = this.getDateTimeByTimezone(timezone);
   //   console.log('date', date);
   //   console.log('time', time);
@@ -726,7 +782,9 @@ export default class App {
   //   }
 
   //   console.log('weatherNow', weatherNow);
-  //   const { temp, app_temp: feelsLike, wind_spd: wind, rh: humidity, weather: { description } } = weatherNow;
+  //   const {
+  //   temp, app_temp: feelsLike, wind_spd: wind, rh: humidity, weather: { description }
+  // } = weatherNow;
   //   const roundTemp = Math.round(temp);
   //   const roundFeels = Math.round(feelsLike);
   //   const roundWind = Math.round(wind);
@@ -751,7 +809,9 @@ export default class App {
   //   //   console.log('backImg', backImg);
   //   // }
 
-  //   const backImg = (isUpdImg) ? await this.getFlickrImgByTags(tags) : this.state.backImg;
+  //   const backImg = (isUpdImg)
+  // ? await this.getFlickrImgByTags(tags)
+  // : this.state.backImg;
 
   //   if (isUpdMap) {
   //     this.generateMapFromCoords(lng, lat);
@@ -790,7 +850,8 @@ export default class App {
   //   const unitsContainer = document.querySelector(this.appConfig.unitsContainer);
   //   const allUnits = unitsContainer.querySelectorAll(this.appConfig.unitSpec);
   //   allUnits.forEach((unit) => unit.classList.remove('active'));
-  //   const choosedUnit = unitsContainer.querySelector(`${this.appConfig.unitSpec}[data-${this.appConfig.unitData}="${newUnits}"]`);
+  //   const choosedUnit = unitsContainer.querySelector(`${this.appConfig.unitSpec}
+  //   [data-${this.appConfig.unitData}="${newUnits}"]`);
   //   choosedUnit.classList.add('active');
   // }
 
@@ -834,18 +895,6 @@ export default class App {
 
   // saveFavorites() { // сохранить избранное в LocalStorage
   //   localStorage.setItem('dsFavoriteMovies', JSON.stringify(this.favorites));
-  // }
-
-  // renderMovies() { // отрендерить фильмы
-  //   this.enableLoader();
-  //   const movies = this.getMovies();
-  //   movies.then((movs) => {
-  //     this.resetSlider();
-  //     this.movies = movs;
-  //     this.showResultsText();
-  //     return (movs && !this.isNullsAmongMovs(movs)) ? this.initSlider(movs) : this.disableLoader();
-  //   })
-  //     .catch((e) => this.processError(e, 'Something went wrong while slider mounting'));
   // }
 
   // isNullsAmongMovs(movsArr) { // есть ли пустые фильмы в массиве фильмов
@@ -907,19 +956,6 @@ export default class App {
   //     .catch((e) => this.processError(e, 'Something went wrong while loading movies info'));
   // }
 
-  // getMovieWithRating(movie) { // получить рейтинг фильма
-  //   const { omdb } = this.appConfig;
-  //   const url = omdb.apiUrl;
-  //   const { apiKey } = omdb;
-  //   const finalUrl = `${url}i=${movie.imdbID}&apikey=${apiKey}`;
-
-  //   return fetch(finalUrl)
-  //     .then((res) => res.json())
-  //     .then((resMovie) => (!('Error' in resMovie) ? resMovie : null))
-  //     .then((data) => data)
-  //     .catch((e) => this.processError(e, 'Something went wrong while loading detailed movie info'));
-  // }
-
   // addListeners() { // добавить слушатели событий
   //   const resetIcon = document.querySelector(this.appConfig.resetIconSelector);
   //   resetIcon.addEventListener('click', this.resetInput);
@@ -929,9 +965,6 @@ export default class App {
 
   //   const keyboardIcon = document.querySelector(this.appConfig.keyboardIconSelector);
   //   keyboardIcon.addEventListener('click', this.showKeyboard);
-
-  //   const searchButton = document.querySelector(this.appConfig.searchButtonIconSelector);
-  //   searchButton.addEventListener('click', () => this.search());
 
   //   const searchInput = document.getElementById(this.appConfig.searchInputId);
   //   searchInput.addEventListener('keyup', this.pushEnter);
@@ -1017,8 +1050,8 @@ export default class App {
   //     const favIdArr = Array.from(this.favorites, (elem) => elem.imdbID);
   //     return favIdArr.includes(movieId);
   //   }
-
-  //   getMovieById(id, fromArr = 'movies') { // получить объект фильма из списка фильмов или избранных
+  //    получить объект фильма из списка фильмов или избранных
+  //   getMovieById(id, fromArr = 'movies') {
   //     const searchMovsArr = (fromArr === 'movies') ? this.movies : this.favorites;
   //     const movieArr = Array.from(searchMovsArr, (elem) => elem.imdbID);
   //     const movieIndex = movieArr.findIndex((el) => (el === id));
@@ -1027,7 +1060,8 @@ export default class App {
 
   //   renderFavorites() { // отрендерить раздел "My Favorites"
   //     const globalFavContainer = document.querySelector(this.appConfig.favoriteContainer);
-  //     const favMoviesContainer = document.querySelector(this.appConfig.favoriteMoviesContainer);
+  //     const favMoviesContainer = document
+  //      .querySelector(this.appConfig.favoriteMoviesContainer);
   //     favMoviesContainer.innerHTML = '';
 
   //     if (this.favorites.length === 0) {
