@@ -49,6 +49,9 @@ export default {
       },
       serviceText: {
         en: {
+          overall: 'the weather for now for',
+          deg: 'degrees',
+          percent: 'percents',
           feels: 'Feels like',
           wind: 'Wind',
           humidity: 'Humidity',
@@ -60,6 +63,9 @@ export default {
           longitude: 'longitude',
         },
         ru: {
+          overall: 'Погода сейчас в',
+          deg: 'градусов',
+          percent: 'процентов',
           feels: 'По ощущению',
           wind: 'Ветер',
           humidity: 'Влажность',
@@ -71,6 +77,9 @@ export default {
           longitude: 'долгота',
         },
         be: {
+          overall: 'надворе зараз в',
+          deg: 'градусаў',
+          percent: 'працэнтау',
           feels: 'АДЧУВАЕЦЦА ЯК',
           wind: 'ВЕЦЕР',
           humidity: 'ВІЛЬГОТНАСЦЬ',

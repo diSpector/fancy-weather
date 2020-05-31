@@ -67,6 +67,5 @@ test('correct year season', () => {
 
 test('tags forms correctly', () => {
   const dateObj = new Date('2020-07-01 19:30');
-  console.log(dateObj.getMonth());
   expect(app.getTagsString(dateObj)).toEqual(`summer,evening`);
 });

@@ -34,3 +34,9 @@
         background-position: -5px center;
     }
 }
+
+@keyframes blinker {
+    50% {
+      opacity: 0;
+    }
+  }

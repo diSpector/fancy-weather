@@ -4,6 +4,7 @@ import apiConfig from '@settings/apiConfig';
 import imagesConfig from '@settings/imagesConfig';
 import errorsConfig from '@settings/errorsConfig';
 import translateConfig from '@settings/translateConfig';
+import voiceConfig from '@settings/voiceConfig';
 import '../css/style.css';
 
 const app = new App(
@@ -12,5 +13,6 @@ const app = new App(
   imagesConfig.obj,
   errorsConfig.obj,
   translateConfig.obj,
+  voiceConfig.obj,
 );
 app.init();

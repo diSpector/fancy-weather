@@ -19,6 +19,7 @@ export default {
     unitsContainer: '.button__temp',
     reloadButton: '.button__reload',
     reloadIcon: '.icon__reload',
+    soundButton: '.button__sound',
     searchButton: '.search__button',
     searchInput: '.search__input input',
     micIcon: '.mic',
@@ -51,10 +52,6 @@ export default {
       spec: '.alllangs',
       data: 'lang',
       value: '.lang__value',
-    },
-
-    commandWords: {
-      // russian: 
     },
 
     // css
