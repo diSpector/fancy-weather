@@ -1,0 +1,36 @@
+@keyframes pulse {
+    0% {
+        background-color: #001F3F;
+    }
+    100% {
+        background-color: #b4b8bb;
+    }
+  }
+
+@keyframes go-top-bottom { 
+    from {
+        background-position: 0px -5px;
+    }
+    to {
+        background-position: 0px 5px;
+    }
+  }
+
+@keyframes reload-rotate {
+    from {
+        transform: rotate(0deg);
+    }
+    to {
+        transform: rotate(360deg);
+    }
+}
+
+@keyframes reload-move {
+    from {
+        background-position: 0px center;
+
+    }
+    to {
+        background-position: -5px center;
+    }
+}

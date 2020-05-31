@@ -92,7 +92,23 @@
                 </div>
             </div>
             <div class="location">
-                <div class="location__map" id="map"></div>
+                <div class="location__map" id="map">
+                    <svg width="0" height="0">
+                        <defs>
+                            <clipPath id="clip-shape" clipPathUnits="objectBoundingBox">
+                                <polygon points="0 0.9, 0 0, 1 0, 1 0.9, 0.8 0.9, 0.8 1, 0.7 0.9"></polygon> 
+                            </clipPath>
+                        </defs>
+                    </svg>
+                    <svg width="0" height="0">
+                        <defs>
+                            <clipPath id="clip-shape-center" clipPathUnits="objectBoundingBox">
+                                <polygon points="0 0.9, 0 0, 1 0, 1 0.9, 0.6 0.9, 0.5 1, 0.4 0.9"></polygon> 
+                            </clipPath>
+                        </defs>
+                    </svg>
+                </div>
+
                 <div class="location__coords">
                     <div class="latitude">Latitude: 53°54'</div>
                     <div class="longitude">Longitude: 27°34'</div>

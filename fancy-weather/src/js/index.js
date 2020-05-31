@@ -1,9 +1,16 @@
 import App from '@modules/app';
 import appConfig from '@settings/appConfig';
 import apiConfig from '@settings/apiConfig';
-// import glideConfig from '@settings/glideConfig';
+import imagesConfig from '@settings/imagesConfig';
+import errorsConfig from '@settings/errorsConfig';
+import translateConfig from '@settings/translateConfig';
 import '../css/style.css';
-// import '../css/keyboard.css';
 
-const app = new App(appConfig.obj, apiConfig.obj);
+const app = new App(
+  appConfig.obj,
+  apiConfig.obj,
+  imagesConfig.obj,
+  errorsConfig.obj,
+  translateConfig.obj,
+);
 app.init();

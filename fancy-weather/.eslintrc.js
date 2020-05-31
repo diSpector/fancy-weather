@@ -10,6 +10,7 @@ module.exports = {
     Atomics: 'readonly',
     SharedArrayBuffer: 'readonly',
     mapboxgl: 'writable',
+    webkitSpeechRecognition: 'writable'
   },
   parser: 'babel-eslint',
   parserOptions: {
@@ -27,6 +28,9 @@ module.exports = {
     ],
     'class-methods-use-this': 0,
     "import/no-unresolved": 0,
+    "new-cap": [2, 
+      {"newIsCapExceptions" : ["webkitSpeechRecognition"]}
+    ]
   },
   settings: {
     'import/resolver': [

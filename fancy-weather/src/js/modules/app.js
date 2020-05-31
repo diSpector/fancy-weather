@@ -1,25 +1,25 @@
 import ApiHelper from './apiHelper';
 import dummyImg from '../../img/bg1.jpg'; // для webpack
-// import mapboxgl from 'mapbox-gl/dist/mapbox-gl.js';
-// import mapboxgl from 'https://api.mapbox.com/mapbox-gl-js/v1.10.1/mapbox-gl.js';
 
 // import Slider from './slider';
 // import KeyboardModule from './keyboard/keyboard_module';
 // import moduleConfig from './keyboard/settings/moduleConfig';
-// import keysConfig from './keyboard/settings/keysConfig';
-
 
 export default class App {
-  constructor(appConfig, apiConfig) {
+  constructor(appConfig, apiConfig, imagesConfig, errorsConfig, translateConfig) {
     this.appConfig = appConfig;
     this.apiConfig = apiConfig;
+    this.images = imagesConfig;
+    this.errorsConfig = errorsConfig;
+    this.translateConfig = translateConfig;
     this.state = {};
     this.lang = null; // язык приложения
     this.units = null; // система измерений приложения
     this.timerId = null;
     this.error = null;
     this.map = null;
-    // this.timezone = null;
+    this.mic = false;
+    this.recognition = null;
   }
 
   async init() { // первоначальный рендеринг
@@ -36,6 +36,7 @@ export default class App {
   setHtmlSetting() { // проставить начальные значения в меню (ед. изм., язык)
     this.updateHtml(this.appConfig.unitsObj, this.units);
     this.updateHtml(this.appConfig.langObj, this.lang);
+    this.updateButtonText(this.lang);
   }
 
   loadUserSettings() { // загрузить данные о языке и ед. изм. из localStorage
@@ -48,7 +49,6 @@ export default class App {
 
       localStorage.setItem('dsWeatherData', JSON.stringify(userSettings));
     }
-    // console.log('localStorage', JSON.parse(localStorage.getItem('dsWeatherData')));
     this.lang = userSettings.lang;
     this.units = userSettings.units;
   }
@@ -64,8 +64,6 @@ export default class App {
     }
     userSettings[key] = value;
     localStorage.setItem('dsWeatherData', JSON.stringify(userSettings));
-    // console.log('localStorage', JSON.parse(localStorage.getItem('dsWeatherData')));
-
   }
 
   addListeners() { // установить слушатели событий
@@ -97,6 +95,46 @@ export default class App {
     // нажатие на enter в поле поиска
     const searchInput = document.querySelector(this.appConfig.searchInput);
     searchInput.addEventListener('keyup', this.pushEnter);
+
+    // нажатие на иконку микрофона
+    const micIcon = document.querySelector(this.appConfig.micIcon);
+    micIcon.addEventListener('click', this.toggleMic);
+  }
+
+  toggleMic = () => { // включить/выключить микрофон для прослушивания
+    this.mic = !this.mic;
+    this.setMicCssStyle();
+    this.setRecognition();
+  }
+
+  setRecognition() { // инициализировать микрофон при его первом нажатии
+    if (!this.recognition) {
+      this.initRecognition();
+    }
+  }
+
+  initRecognition() { // инициализация микрофона
+    this.recognition = new webkitSpeechRecognition();
+
+    this.recognition.addEventListener('result', event => {
+      if (this.mic) {
+        this.recognition.lang = this.appConfig.languagesCodes[this.lang];
+        const speakedWord = event.results[0][0].transcript.toLowerCase();
+        const searchInput = document.querySelector(this.appConfig.searchInput);
+        searchInput.value = speakedWord;
+        this.processSearch();
+        console.log('word: ', speakedWord);
+      }
+    })
+
+    this.recognition.addEventListener('end', this.recognition.start);
+
+    this.recognition.start();
+  }
+
+  setMicCssStyle() { // добавить/убрать стиль включенного микрофона
+    const micIcon = document.querySelector(this.appConfig.micIcon);
+    micIcon.classList.toggle('on');
   }
 
   showError = () => { // вывести ошибку под полем поиска
@@ -135,12 +173,18 @@ export default class App {
     const htmlObj = this.appConfig.langObj;
     this.saveUserSettings('lang', newLang);
     this.updateHtml(htmlObj, newLang);
+    this.updateButtonText(newLang);
     this.updateApp(htmlObj.data, newLang);
   }
 
   getNewValueFromClicked(target, dataAttrName) { // получить значение data-атрибута
     const dataAttrVal = target.dataset[dataAttrName];
     return dataAttrVal;
+  }
+
+  updateButtonText(newLang) { // обновить текст на кнопке поиска
+    const searchButton = document.querySelector(this.appConfig.searchButton);
+    searchButton.innerText = this.translateConfig.translations.searchButtonText[newLang];
   }
 
   updateHtml(htmlObj, newValue) { // проставить активные стили при изменении языка/единиц измер.
@@ -191,6 +235,8 @@ export default class App {
   }
 
   reloadPic = async () => { // обновить фоновую картинку
+    const reloadIcon = document.querySelector(this.appConfig.reloadIcon);
+    reloadIcon.classList.add('rotated');
     const tags = (this.state.tags) ? this.state.tags : this.appConfig.defaults.tags;
     const newImg = await this.getFlickrImgByTags(tags);
     this.state.backImg = newImg;
@@ -198,6 +244,7 @@ export default class App {
     if (this.state.backImg) {
       body.style.backgroundImage = `${this.appConfig.opacityStyle}, url('${this.state.backImg}')`;
     }
+    reloadIcon.classList.remove('rotated');
   }
 
   runTimer = () => { // сбросить старый таймер, запустить новый (часы)
@@ -321,7 +368,7 @@ export default class App {
 
     // console.log('weatherNow', weatherNow);
     const {
-      temp, app_temp: feelsLike, wind_spd: wind, rh: humidity, weather: { description },
+      temp, app_temp: feelsLike, wind_spd: wind, rh: humidity, weather: { description, icon },
     } = weatherNow;
     const roundTemp = Math.round(temp);
     const roundFeels = Math.round(feelsLike);
@@ -333,7 +380,9 @@ export default class App {
       wind: roundWind,
       humidity: roundHumidity,
       description,
+      icon,
     };
+
     // console.log('weatherToday', weatherToday);
 
     const tags = this.getTagsString(dateObj);
@@ -380,14 +429,14 @@ export default class App {
     try {
       const cityPromise = await fetch(apiUrl);
       if (cityPromise.status !== 200) {
-        this.error = this.appConfig.errors.userGeoLocationError[this.lang];
+        this.error = this.errorsConfig.errors.userGeoLocationError[this.lang];
         return null;
       }
 
       const cityJson = await cityPromise.json();
       return cityJson.city;
     } catch (e) {
-      this.error = this.appConfig.errors.userGeoLocationError[this.lang];
+      this.error = this.errorsConfig.errors.userGeoLocationError[this.lang];
       return null;
     }
   }
@@ -401,19 +450,19 @@ export default class App {
     try {
       const cityParamsPromise = await fetch(apiUrl);
       if (cityParamsPromise.status !== 200) {
-        this.error = this.appConfig.errors.userCityError[this.lang];
+        this.error = this.errorsConfig.errors.userCityError[this.lang];
         return null;
       }
 
       const cityParamsJson = await cityParamsPromise.json();
       if (cityParamsJson.results.length === 0) {
-        this.error = this.appConfig.errors.noCityFound[this.lang];
+        this.error = this.errorsConfig.errors.noCityFound[this.lang];
         return null;
       }
 
       return cityParamsJson.results[0];
     } catch (e) {
-      this.error = this.appConfig.errors.userCityError[this.lang];
+      this.error = this.errorsConfig.errors.userCityError[this.lang];
       return null;
     }
   }
@@ -432,18 +481,18 @@ export default class App {
       // });
       const { status } = weatherPromise;
       if (status !== 200) {
-        this.error = this.appConfig.errors.noWeatherFound[this.lang];
+        this.error = this.errorsConfig.errors.noWeatherFound[this.lang];
         return null;
       }
       const weatherJson = await weatherPromise.json();
       if (weatherJson.data.length === 0) {
-        this.error = this.appConfig.errors.noWeatherFound[this.lang];
+        this.error = this.errorsConfig.errors.noWeatherFound[this.lang];
         return null;
       }
       const res = weatherJson.data[0];
       return res;
     } catch (e) {
-      this.error = this.appConfig.errors.noWeatherFound[this.lang];
+      this.error = this.errorsConfig.errors.noWeatherFound[this.lang];
       return null;
     }
   }
@@ -460,18 +509,18 @@ export default class App {
       //   headers: { origin: '' },
       // });
       if (weatherPromise.status !== 200) {
-        this.error = this.appConfig.errors.noWeatherFound[this.lang];
+        this.error = this.errorsConfig.errors.noWeatherFound[this.lang];
         return null;
       }
       const weatherJson = await weatherPromise.json();
       const dataLength = weatherJson.data.length;
       if (dataLength === 0 || dataLength < 4) {
-        this.error = this.appConfig.errors.noWeatherFound[this.lang];
+        this.error = this.errorsConfig.errors.noWeatherFound[this.lang];
         return null;
       }
       return weatherJson.data.slice(1, 4);
     } catch (e) {
-      this.error = this.appConfig.errors.noWeatherFound[this.lang];
+      this.error = this.errorsConfig.errors.noWeatherFound[this.lang];
       return null;
     }
   }
@@ -484,7 +533,7 @@ export default class App {
     try {
       const imgPromise = await fetch(apiUrl);
       if (imgPromise.status !== 200) {
-        // this.error = this.appConfig.errors.imgApiError[this.lang];
+        // this.error = this.errorsConfig.errors.imgApiError[this.lang];
         return defaultImgUrl;
       }
       const imgJson = await imgPromise.json();
@@ -502,7 +551,7 @@ export default class App {
       }
       return imgUrl;
     } catch (e) {
-      // this.error = this.appConfig.errors.imgApiError[this.lang];
+      // this.error = this.errorsConfig.errors.imgApiError[this.lang];
       return defaultImgUrl;
     }
   }
@@ -569,17 +618,20 @@ export default class App {
   getYearTime(monthNum) { // получить название времени года
     let yearTime = '';
     switch (true) {
-      case monthNum <= 3:
+      case monthNum <= 2:
         yearTime = 'winter';
         break;
-      case monthNum <= 6:
+      case monthNum <= 5:
         yearTime = 'spring';
         break;
-      case monthNum <= 9:
+      case monthNum <= 8:
         yearTime = 'summer';
         break;
-      default:
+      case monthNum <= 11:
         yearTime = 'autumn';
+        break;
+      default:
+        yearTime = 'winter';
         break;
     }
     return yearTime;
@@ -611,14 +663,14 @@ export default class App {
 
   destructWeatherForDay = (weather1Obj) => { // подготовить объект погоды за 1 день
     const locale = this.appConfig.languagesCodes[this.lang];
-    const { temp, valid_date: validDate, weather: { description, code } } = weather1Obj;
+    const { temp, valid_date: validDate, weather: { description, code, icon } } = weather1Obj;
     const roundTemp = Math.round(temp);
     let weekday = (new Date(validDate)).toLocaleDateString(locale, { weekday: 'long' });
     if (this.lang === 'be') { // слегка костыльный перевод полного дня недели для бел.яза
-      weekday = this.appConfig.translations.weekdays.full[(new Date(validDate)).getDay()];
+      weekday = this.translateConfig.translations.weekdays.full[(new Date(validDate)).getDay()];
     }
     return {
-      roundTemp, weekday, description, code,
+      roundTemp, weekday, description, code, icon,
     };
   }
 
@@ -650,7 +702,7 @@ export default class App {
       const weekDay = corDateObj.getDay();
       const monthNum = corDateObj.getMonth();
       const dateNum = corDateObj.getDate();
-      const translateConfig = this.appConfig.translations;
+      const translateConfig = this.translateConfig.translations;
       date = `${translateConfig.weekdays.short[weekDay]} ${dateNum} ${translateConfig.monthes.full[monthNum]}`;
     }
 
@@ -659,12 +711,12 @@ export default class App {
 
   renderAllData = () => { // наполнить контейнеры значениями из state
     const inputSearch = document.querySelector(this.appConfig.searchInput);
-    inputSearch.placeholder = this.appConfig.placeholderText[this.lang];
+    inputSearch.placeholder = this.translateConfig.translations.placeholderText[this.lang];
 
     const errorContainer = document.querySelector(this.appConfig.errorContainer);
     errorContainer.classList.add('hidden');
 
-    const serviceText = this.appConfig.serviceText[this.lang];
+    const serviceText = this.translateConfig.translations.serviceText[this.lang];
 
     const body = document.querySelector('body');
     if (this.state.backImg) {
@@ -679,6 +731,9 @@ export default class App {
 
     const tempNowContainer = document.querySelector(this.appConfig.tempNowContainer);
     tempNowContainer.innerText = `${this.state.weatherToday.temp}`;
+
+    const iconWeatherNow = document.querySelector(this.appConfig.tempNowIcon);
+    iconWeatherNow.style.backgroundImage = `url(${this.images[this.state.weatherToday.icon]})`;
 
     const overcastContainer = document.querySelector(this.appConfig.overcastContainer);
     overcastContainer.innerText = `${this.state.weatherToday.description}`;
@@ -696,8 +751,12 @@ export default class App {
     weatherTomorrowContainers.forEach((item, index) => {
       const dayTemp = item.querySelector(this.appConfig.dayTempContainer);
       const dayName = item.querySelector(this.appConfig.dayNameContainer);
+      const dayTempIcon = item.querySelector(this.appConfig.dayTempIcon);
       dayTemp.innerText = `${this.state.weather3Days[index].roundTemp}°`;
       dayName.innerText = `${this.state.weather3Days[index].weekday}`;
+      dayTempIcon.style.backgroundImage = `url(${
+        this.images[this.state.weather3Days[index].icon]
+        })`;
     });
 
     const latitudeContainer = document.querySelector(this.appConfig.latitudeContainer);

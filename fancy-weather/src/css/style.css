@@ -2,6 +2,8 @@
 /* @import '~normalize.css'; */ /* тильда означает, что пакет нужно искать в node_modules */
 /* @import '~@glidejs/glide/dist/css/glide.core.min.css'; glide styles */
 
+@import 'animate.css';
+
 html, body {
     padding: 0;
     margin: 0;
@@ -9,11 +11,8 @@ html, body {
 }
 
 html {
-    /* font-family: 'Open Sans', sans-serif; */
     font-family: 'Montserrat', sans-serif;
     font-size: 10px;
-    /* -webkit-text-stroke-width: 1px;
-   -webkit-text-stroke-color: lightgray; */
 }
 
 body {
@@ -44,9 +43,6 @@ body {
 }
 
 .loader{
-    /* position: absolute;
-    width: 100%;
-    height: 100%; */
     position: fixed;
     top: 0;
     left: 0;
@@ -91,7 +87,7 @@ body {
 
 .button:hover {
     cursor: pointer;
-    /* background-color: #b4b8bb; */
+    background-color: #b4b8bb;
 }
 
 .button__reload {
@@ -103,7 +99,9 @@ body {
 }
 
 .button__reload:hover {
-    background-color: #b4b8bb;
+    /* background-color: #b4b8bb; */
+    /* animation: reload-move 1s linear infinite alternate; */
+    /* animation: pulse 1s linear infinite alternate; */
 }
 
 .icon__reload {
@@ -116,6 +114,10 @@ body {
     position: absolute;
     top: 13px;
     left: 15px;
+}
+
+.rotated {
+    animation: reload-rotate 0.7s linear infinite;
 }
 
 .button__lang {
@@ -156,6 +158,7 @@ body {
 
 .button__lang:hover {
     background-color: #b4b8bb;
+    animation: pulse 1s linear infinite alternate;
 }
 
 .button__lang .active:hover{
@@ -193,7 +196,8 @@ body {
 
 .temptype:hover {
     /* background: rgba(76, 82, 85, 0.4); */
-    background-color: #b4b8bb;
+    /* background-color: #b4b8bb; */
+    animation: pulse 1s linear infinite alternate;
 }
 
 .temptype::before {
@@ -218,17 +222,6 @@ body {
     border-top-right-radius: 5px;
     border-bottom-right-radius: 5px;
 }
-
-
-/* .fahrentgeit {
-    border-top-left-radius: 5px;
-    border-bottom-left-radius: 5px; 
-}
-
-.celsius {
-    border-top-right-radius: 5px;
-    border-bottom-right-radius: 5px;
-} */
 
 .search {
     width: 375px;
@@ -275,6 +268,7 @@ body {
 }
 
 .search__button:hover {
+    animation: pulse 1s linear infinite alternate;
     cursor: pointer;
     background: lightgray;
 }
@@ -299,6 +293,10 @@ body {
     height: 18px;
     top: 15px;
     right: 10px;
+}
+
+.on {
+    background-image: url('../img/icons/mic_on.svg');
 }
 
 .mic:hover {
@@ -373,10 +371,17 @@ body {
 }
 
 .info__icon {
-    background-image: url('../img/icons/weather_dummy.svg');
-    width: 162px;
-    height: 102px;
-    margin-bottom: 50px;
+    animation: go-top-bottom 1s linear infinite alternate;
+    /* background-image: url('../img/icons/weather/r05d.png'); */
+    background-size: cover;
+    background-position: center;
+    background-repeat: no-repeat;
+    /* background-image: url('../img/icons/weather_dummy.svg'); */
+    width: 120px;
+    /* height: 102px;
+    margin-bottom: 50px; */
+    height: 108px;
+    margin-bottom: 45px;
 }
 
 .info__text {
@@ -409,12 +414,14 @@ body {
 }
 
 .temperature__icon {
-    background-image: url('../img/icons/weather_dummy.svg');
+    animation: go-top-bottom 1s linear infinite alternate;
+    /* background-image: url('../img/icons/weather/t05d.png'); */
+    /* background-image: url('../img/icons/weather_dummy.svg'); */
     background-size: cover;
     background-position: center;
     background-repeat: no-repeat;
     width: 67px;
-    height: 44px;
+    height: 67px;
     margin-top: 20px;
 }
 
@@ -426,8 +433,9 @@ body {
 .location__map {
     background-image: url('../img/map.png');
     width: 375px;
-    height: 375px;
+    height: 400px;
     border-radius: 25px;
+    clip-path: url(#clip-shape);
 }
 
 .location__coords {
@@ -435,7 +443,7 @@ body {
     line-height: 3.0rem;
     text-align: right;
     font-weight: 600;
-    margin-top: 35px;
+    margin-top: 15px;
 }
 
 .latitude, .longitude{
@@ -466,12 +474,12 @@ body {
     }
     .location__map {
         margin: 0 auto; 
+        clip-path: url(#clip-shape-center);
     }
     .location__coords {
         text-align: center;
         margin-bottom: 20px;
     }
-
 }
 
 @media (max-width: 810px) {
@@ -551,6 +559,10 @@ body {
 
     .search__button {
         width: 27%;
+    }
+
+    .city {
+        font-size: 3.3rem;
     }
 
     .today__temperature {
